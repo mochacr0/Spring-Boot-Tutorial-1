@@ -1,11 +1,14 @@
 package com.example.tutorial.security;
 
 import com.example.tutorial.exception.AuthMethodNotSupportedException;
+import com.example.tutorial.exception.InvalidDataException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -19,6 +22,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 
 import java.io.IOException;
 
+@Slf4j
 public class RestLoginProcessingFilter extends AbstractAuthenticationProcessingFilter {
     private final ObjectMapper mapper;
     private final AuthenticationSuccessHandler successHandler;
@@ -44,7 +48,7 @@ public class RestLoginProcessingFilter extends AbstractAuthenticationProcessingF
         catch (Exception e) {
             throw new AuthenticationServiceException("Invalid username or password");
         }
-        if (loginRequest.getUsername().isEmpty() || loginRequest.getPassword().isEmpty()) {
+        if (StringUtils.isEmpty(loginRequest.getUsername()) || StringUtils.isEmpty(loginRequest.getPassword())) {
             throw new AuthenticationServiceException("Username or password not provided");
         }
         //setup token from request

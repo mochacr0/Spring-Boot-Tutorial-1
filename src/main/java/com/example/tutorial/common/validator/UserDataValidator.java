@@ -24,16 +24,20 @@ public class UserDataValidator extends DataValidator<User>{
             }
         }
         else {
-            if (user.getPassword() == null) {
+            if (user.getPassword() == null){
                 throw new InvalidDataException("Password should be specified");
             }
         }
         if (user.getName() != null) {
             User existingUserWithGivenName = userService.findUserByName(user.getName());
-            if (existingUserWithGivenName != null
-                    && !existingUserWithGivenName.getId().equals(user.getId())
-                    && StringUtils.equals(user.getName(), existingUserWithGivenName.getName())) {
+            if (existingUserWithGivenName != null && !existingUserWithGivenName.getId().equals(user.getId())) {
                 throw new InvalidDataException("User with name " + user.getName() + " already exists");
+            }
+        }
+        if (user.getEmail() != null) {
+            User existingUserWithGivenEmail = userService.findUserByEmail(user.getEmail());
+            if (existingUserWithGivenEmail != null && !existingUserWithGivenEmail.getId().equals(user.getId())) {
+                throw new InvalidDataException("User with email " + user.getEmail() + " already exists");
             }
         }
     }

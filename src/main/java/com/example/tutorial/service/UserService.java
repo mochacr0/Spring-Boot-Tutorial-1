@@ -12,6 +12,6 @@ public interface UserService {
     PageData<User> findUsers(PageParameter pageParameter);
     User saveUser(User user);
     User findUserByName(String name);
-
     User findUserById(UUID id);
+    User findUserByEmail(String email);
 }

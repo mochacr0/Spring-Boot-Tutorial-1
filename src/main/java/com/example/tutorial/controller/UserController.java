@@ -21,13 +21,14 @@ import static com.example.tutorial.controller.ControllerConstants.*;
 
 @Slf4j
 @RestController
+@RequestMapping("/users")
 @Tag(name = "User", description = "User-related APIs")
 public class UserController {
     @Autowired
     private UserService userService;
 
     @Operation(tags = {"User"}, summary = "Returns a page of available users")
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
+    @RequestMapping(value = "", method = RequestMethod.GET)
     PageData<User> getAllUsers(@Parameter(description = PAGE_NUMBER_DESCRIPTION)
                                @RequestParam(defaultValue = PAGE_NUMBER_DEFAULT_STRING_VALUE) int page,
                                @Parameter(description = PAGE_SIZE_DESCRIPTION)
@@ -45,7 +46,7 @@ public class UserController {
                                                                                 "The newly created User Id will be present in the response. " +
                                                                                 "Specify existing User Id to update user. " +
                                                                                 "Referencing non-existing User Id will cause 'Not Found' error.")
-    @RequestMapping(value = "/user", method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.POST)
     User saveUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
                   @RequestBody User user) {
         return userService.saveUser(user);

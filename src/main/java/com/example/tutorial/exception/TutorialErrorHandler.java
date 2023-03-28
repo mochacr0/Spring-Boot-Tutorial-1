@@ -43,10 +43,10 @@ public class TutorialErrorHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public void handle(Exception exception, HttpServletResponse response) throws IOException {
         log.error("Error: ", exception);
-        //define exception type
         if (!response.isCommitted()) {
             TutorialErrorResponse exceptionResponse = new TutorialErrorResponse(exceptionToStatus(exception), exception.getMessage());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setStatus(exceptionResponse.getStatus());
             mapper.writeValue(response.getWriter(), exceptionResponse);
         }
     }
@@ -56,6 +56,7 @@ public class TutorialErrorHandler extends ResponseEntityExceptionHandler {
         if (HttpStatus.INTERNAL_SERVER_ERROR.equals(statusCode)) {
             request.setAttribute("javax.servlet.error.exception", ex, 0);
         }
+        log.info("?????????????????????????????");
         return new ResponseEntity<>(new TutorialErrorResponse((HttpStatus) statusCode, ex), headers, statusCode);
     }
 }

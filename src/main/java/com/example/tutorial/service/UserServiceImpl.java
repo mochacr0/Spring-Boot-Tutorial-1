@@ -8,6 +8,7 @@ import com.example.tutorial.common.validator.DataValidator;
 import com.example.tutorial.common.validator.UserDataValidator;
 import com.example.tutorial.model.UserEntity;
 import com.example.tutorial.repository.UserRepository;
+import io.micrometer.common.util.StringUtils;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +57,7 @@ public class UserServiceImpl extends BaseService<User, UserEntity> implements Us
     public User saveUser(User user) {
         log.info("Performing service saveUser");
         dataValidator.validate(user);
-        if (user.getId() == null) {
+        if (!StringUtils.isEmpty(user.getPassword())) {
             String encodedPassword = passwordEncoder.encode(user.getPassword());
             user.setPassword(encodedPassword);
         }
@@ -73,5 +74,11 @@ public class UserServiceImpl extends BaseService<User, UserEntity> implements Us
     public User findUserById(UUID id) {
         log.info("Performing service findUserById");
         return DaoUtils.toData(userRepository.findById(id));
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        log.info("Performing service findUserByEmail");
+        return DaoUtils.toData(userRepository.findByEmail(email));
     }
 }

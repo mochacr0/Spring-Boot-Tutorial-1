@@ -4,6 +4,7 @@ import com.example.tutorial.common.security.Authority;
 import com.example.tutorial.common.validator.Length;
 import com.example.tutorial.model.ToEntity;
 import com.example.tutorial.model.UserEntity;
+import com.example.tutorial.security.oauth2.OAuth2UserInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,10 @@ public class User extends AbstractData implements ToEntity<UserEntity> {
     @Length(fieldName = "name")
     @Schema(title = "name", description = "Username", example = "user00")
     private String name;
+
+    @Length(fieldName = "email")
+    @Schema(title = "email", description = "User email", example = "nthai2001cr@gmail.com")
+    private String email;
 
     @Length(fieldName = "password")
     @Schema(title = "password", description = "User password")
@@ -45,10 +50,17 @@ public class User extends AbstractData implements ToEntity<UserEntity> {
     public User(User user) {
         this.setId(user.getId());
         this.setName(user.getName());
+        this.setEmail(user.getEmail());
         this.setPassword(user.getPassword());
         this.setAuthority(user.getAuthority());
         this.setCreatedAt(user.getCreatedAt());
         this.setUpdatedAt(user.getUpdatedAt());
+    }
+
+    public User(OAuth2UserInfo oauth2UserInfo) {
+        this.setName(oauth2UserInfo.getName());
+        this.setEmail(oauth2UserInfo.getEmail());
+        this.setPassword("123456");
     }
 
     public Authority getAuthority() {
@@ -62,6 +74,8 @@ public class User extends AbstractData implements ToEntity<UserEntity> {
         builder.append(this.id);
         builder.append(", name=");
         builder.append(this.name);
+        builder.append(", email=");
+        builder.append(this.email);
         builder.append(", authority");
         builder.append(this.authority.name());
         builder.append(", createdAt=");
@@ -77,9 +91,9 @@ public class User extends AbstractData implements ToEntity<UserEntity> {
         UserEntity entity = new UserEntity();
         entity.setId(this.getId());
         entity.setName(this.getName());
+        entity.setEmail(this.getEmail());
         entity.setPassword(this.getPassword());
         entity.setAuthority(this.getAuthority());
-//        entity.setCreatedAt(this.getCreatedAt());
         return entity;
     }
 }

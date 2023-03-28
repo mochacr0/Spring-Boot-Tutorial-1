@@ -10,12 +10,15 @@ import static com.example.tutorial.model.ModelConstants.*;
 
 
 @Entity
-@Table(name=USER_TABLE)
+@Table(name = USER_TABLE)
 @Data
 @NoArgsConstructor
 public class UserEntity extends AbstractEntity<User> {
-    @Column(name = NAME_COLUMN)
+    @Column(name = NAME_COLUMN, unique = true)
     private String name;
+
+    @Column(name = EMAIL_COLUMN, unique = true)
+    private String email;
 
     @Column(name = PASSWORD_COLUMN)
     private String password;
@@ -29,6 +32,7 @@ public class UserEntity extends AbstractEntity<User> {
         User user = new User();
         user.setId(this.getId());
         user.setName(this.getName());
+        user.setEmail(this.getEmail());
         user.setPassword(this.getPassword());
         user.setAuthority(this.getAuthority());
         user.setCreatedAt(this.getCreatedAt());
@@ -43,6 +47,8 @@ public class UserEntity extends AbstractEntity<User> {
         builder.append(this.id);
         builder.append(", name=");
         builder.append(this.name);
+        builder.append(", email=");
+        builder.append(this.email);
         builder.append(", authority");
         builder.append(this.authority.name());
         builder.append(", createdAt=");
