@@ -7,6 +7,7 @@ import com.example.tutorial.model.UserEntity;
 import com.example.tutorial.security.oauth2.OAuth2UserInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @Schema
 public class User extends AbstractData implements ToEntity<UserEntity> {
 
@@ -25,9 +27,9 @@ public class User extends AbstractData implements ToEntity<UserEntity> {
     @Schema(title = "email", description = "User email", example = "nthai2001cr@gmail.com")
     private String email;
 
-    @Length(fieldName = "password")
-    @Schema(title = "password", description = "User password")
-    private String password;
+//    @Length(fieldName = "password")
+//    @Schema(title = "password", description = "User password")
+//    private String password;
 
     @Schema(title = "role", description = "User role", example = "USER, ADMIN")
     private Authority authority = Authority.USER;
@@ -47,11 +49,15 @@ public class User extends AbstractData implements ToEntity<UserEntity> {
         return this.updatedAt;
     }
 
+    public Authority getAuthority() {
+        return this.authority;
+    }
+
     public User(User user) {
         this.setId(user.getId());
         this.setName(user.getName());
         this.setEmail(user.getEmail());
-        this.setPassword(user.getPassword());
+//        this.setPassword(user.getPassword());
         this.setAuthority(user.getAuthority());
         this.setCreatedAt(user.getCreatedAt());
         this.setUpdatedAt(user.getUpdatedAt());
@@ -60,11 +66,12 @@ public class User extends AbstractData implements ToEntity<UserEntity> {
     public User(OAuth2UserInfo oauth2UserInfo) {
         this.setName(oauth2UserInfo.getName());
         this.setEmail(oauth2UserInfo.getEmail());
-        this.setPassword("123456");
+//        this.setPassword("123456");
     }
 
-    public Authority getAuthority() {
-        return this.authority;
+    public User(RegisterUserRequest registerUserRequest) {
+        this.setName(registerUserRequest.getName());
+        this.setEmail(registerUserRequest.getEmail());
     }
 
     @Override
@@ -92,7 +99,7 @@ public class User extends AbstractData implements ToEntity<UserEntity> {
         entity.setId(this.getId());
         entity.setName(this.getName());
         entity.setEmail(this.getEmail());
-        entity.setPassword(this.getPassword());
+//        entity.setPassword(this.getPassword());
         entity.setAuthority(this.getAuthority());
         return entity;
     }

@@ -7,10 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class DataValidator<D extends AbstractData> {
     public final void validate(D data) {
-        log.info("Perform data validation for: " + data.toString());
         if (data == null) {
             throw new InvalidDataException("Data object can't be null");
         }
+        log.info("Perform data validation for: " + data);
         ConstraintValidator.validateFields(data);
         validateImpl(data);
     }

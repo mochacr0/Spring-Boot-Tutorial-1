@@ -2,6 +2,7 @@ package com.example.tutorial.controller;
 
 import com.example.tutorial.common.data.PageData;
 import com.example.tutorial.common.data.PageParameter;
+import com.example.tutorial.common.data.RegisterUserRequest;
 import com.example.tutorial.common.data.User;
 import com.example.tutorial.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +51,14 @@ public class UserController {
     User saveUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
                   @RequestBody User user) {
         return userService.saveUser(user);
+    }
+
+    @Operation(tags = {"User"}, summary = "Register new user", description = "Register new user. When creating user, platform generates User Id as time-based UUID. " +
+            "The newly created User Id will be present in the response. ")
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    User regsiterUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+                  @RequestBody RegisterUserRequest user) {
+        return userService.registerUser(user);
     }
 
 }

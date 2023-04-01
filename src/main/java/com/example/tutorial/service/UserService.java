@@ -2,6 +2,7 @@ package com.example.tutorial.service;
 
 import com.example.tutorial.common.data.PageData;
 import com.example.tutorial.common.data.PageParameter;
+import com.example.tutorial.common.data.RegisterUserRequest;
 import com.example.tutorial.common.data.User;
 import org.springframework.data.domain.PageRequest;
 
@@ -14,4 +15,5 @@ public interface UserService {
     User findUserByName(String name);
     User findUserById(UUID id);
     User findUserByEmail(String email);
+    User registerUser(RegisterUserRequest user);
 }

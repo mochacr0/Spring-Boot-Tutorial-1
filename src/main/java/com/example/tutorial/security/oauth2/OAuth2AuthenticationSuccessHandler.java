@@ -1,16 +1,24 @@
 package com.example.tutorial.security.oauth2;
 
+import com.example.tutorial.common.data.RegisterUserRequest;
 import com.example.tutorial.common.data.User;
+import com.example.tutorial.common.data.UserCredentials;
 import com.example.tutorial.common.security.SecurityUser;
+import com.example.tutorial.common.validator.UserCredentialsDataValidator;
+import com.example.tutorial.config.UserPasswordPolicyConfiguration;
 import com.example.tutorial.security.JwtAccessToken;
 import com.example.tutorial.security.JwtToken;
 import com.example.tutorial.security.JwtTokenFactory;
+import com.example.tutorial.service.UserCredentialsService;
 import com.example.tutorial.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.passay.CharacterRule;
+import org.passay.PasswordGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
@@ -26,6 +34,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -38,6 +47,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private JwtTokenFactory jwtTokenFactory;
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserPasswordPolicyConfiguration passwordPolicy;
     @Autowired
     private HttpCookieOAuth2AuthorizationRequestRepository authorizationRequestRepository;
 
@@ -63,9 +74,16 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         OAuth2UserInfo oauth2UserInfo = OAuth2UserInfoMapper.getOAuth2UserInfo(oauth2User.getAttributes(), registrationId);
         User user = userService.findUserByEmail(oauth2UserInfo.getEmail());
         if (user == null) {
-            user = new User(oauth2UserInfo);
-            userService.saveUser(user);
+            RegisterUserRequest registerUserRequest = new RegisterUserRequest();
+            PasswordGenerator passwordGenerator = new PasswordGenerator();
+            String rawPassword = passwordGenerator.generatePassword(passwordPolicy.getMinimumLength(), passwordPolicy.getPasswordCharacterRules());
+            registerUserRequest.setName(oauth2UserInfo.getName());
+            registerUserRequest.setEmail(oauth2UserInfo.getEmail());
+            registerUserRequest.setPassword(rawPassword);
+            registerUserRequest.setConfirmPassword(rawPassword);
+            user = userService.registerUser(registerUserRequest);
         }
+
         SecurityUser securityUser = new SecurityUser(user);
         return securityUser;
     }

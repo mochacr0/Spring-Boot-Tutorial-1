@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class DaoUtils {
     public static <D> PageData<D> toPageData(Page<? extends ToData<D>> page) {
-        log.info("-------------------------------------------");
         List<D> data = page.getContent().stream().map(dataElement -> dataElement.toData()).collect(Collectors.toList());
         return new PageData<>(page.hasNext(), page.getTotalElements(), page.getTotalPages(), data);
     }

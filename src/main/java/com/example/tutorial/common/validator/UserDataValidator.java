@@ -17,17 +17,13 @@ public class UserDataValidator extends DataValidator<User>{
 //        if (StringUtils.isEmpty(user.getName())) {
 //            throw new InvalidDataException("User name should be specified");
 //        }
-        if (user.getId() != null) {
-            User existingUser = userService.findUserById(user.getId());
-            if (existingUser == null) {
-                throw new ItemNotFoundException("User with id [" + user.getId() + "] is not found");
-            }
+        if (user.getId() == null) {
+            validateOnCreate(user);
         }
         else {
-            if (user.getPassword() == null){
-                throw new InvalidDataException("Password should be specified");
-            }
+            validateOnUpdate(user);
         }
+        //common validation
         if (user.getName() != null) {
             User existingUserWithGivenName = userService.findUserByName(user.getName());
             if (existingUserWithGivenName != null && !existingUserWithGivenName.getId().equals(user.getId())) {
@@ -39,6 +35,22 @@ public class UserDataValidator extends DataValidator<User>{
             if (existingUserWithGivenEmail != null && !existingUserWithGivenEmail.getId().equals(user.getId())) {
                 throw new InvalidDataException("User with email " + user.getEmail() + " already exists");
             }
+        }
+    }
+
+    @Override
+    protected void validateOnCreate(User data) {
+        super.validateOnCreate(data);
+    }
+
+    @Override
+    protected void validateOnUpdate(User data) {
+        if (data.getId() == null) {
+            throw new InvalidDataException("User ID should be specified");
+        }
+        User existingUser = userService.findUserById(data.getId());
+        if (existingUser == null) {
+            throw new ItemNotFoundException("User with id [" + data.getId() + "] is not found");
         }
     }
 }
