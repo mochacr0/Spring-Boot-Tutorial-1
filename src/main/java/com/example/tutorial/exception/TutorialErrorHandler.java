@@ -2,8 +2,10 @@ package com.example.tutorial.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.*;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,12 +24,14 @@ public class TutorialErrorHandler extends ResponseEntityExceptionHandler {
     @Autowired
     private ObjectMapper mapper;
 
-    private static Map<Class, HttpStatus> exceptionToStatusMap = new HashMap<>();
+    private static final Map<Class<? extends Exception>, HttpStatus> exceptionToStatusMap = new HashMap<>();
 
     static {
         exceptionToStatusMap.put(InvalidDataException.class, HttpStatus.BAD_REQUEST);
         exceptionToStatusMap.put(IllegalArgumentException.class, HttpStatus.BAD_REQUEST);
         exceptionToStatusMap.put(IncorrectParameterException.class, HttpStatus.BAD_REQUEST);
+        exceptionToStatusMap.put(PropertyReferenceException.class, HttpStatus.BAD_REQUEST);
+        exceptionToStatusMap.put(ValidationException.class, HttpStatus.BAD_REQUEST);
         exceptionToStatusMap.put(AuthenticationException.class, HttpStatus.UNAUTHORIZED);
         exceptionToStatusMap.put(AccessDeniedException.class, HttpStatus.FORBIDDEN);
         exceptionToStatusMap.put(ItemNotFoundException.class, HttpStatus.NOT_FOUND);
@@ -56,7 +60,6 @@ public class TutorialErrorHandler extends ResponseEntityExceptionHandler {
         if (HttpStatus.INTERNAL_SERVER_ERROR.equals(statusCode)) {
             request.setAttribute("javax.servlet.error.exception", ex, 0);
         }
-        log.info("?????????????????????????????");
         return new ResponseEntity<>(new TutorialErrorResponse((HttpStatus) statusCode, ex), headers, statusCode);
     }
 }

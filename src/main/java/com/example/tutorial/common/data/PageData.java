@@ -1,21 +1,24 @@
 package com.example.tutorial.common.data;
 
 import com.example.tutorial.common.data.ToData;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
+@Setter
 @NoArgsConstructor
 @Schema
 public class PageData<T> {
 
     @Schema(description = "boolean indicates more pages", accessMode = Schema.AccessMode.READ_ONLY)
+    @JsonProperty("hasNext")
     private boolean hasNext;
 
     @Schema(description = "Total number of elements in all available pages", accessMode = Schema.AccessMode.READ_ONLY)
@@ -33,11 +36,26 @@ public class PageData<T> {
 //        this.totalPages = page.getTotalPages();
 //        this.data = page.getContent().stream().map(dataElement -> dataElement.toData()).collect(Collectors.toList());
 //    }
-
-        public <D> PageData(boolean hasNext, long totalElements, long totalPages, List<T> data) {
+    public <D> PageData(boolean hasNext, long totalElements, long totalPages, List<T> data) {
         this.hasNext = hasNext;
         this.totalElements = totalElements;
         this.totalPages = totalPages;
         this.data = data;
+    }
+
+    public boolean hasNext() {
+        return hasNext;
+    }
+
+    public long getTotalElements() {
+        return totalElements;
+    }
+
+    public long getTotalPages() {
+        return totalPages;
+    }
+
+    public List<T> getData() {
+        return data;
     }
 }

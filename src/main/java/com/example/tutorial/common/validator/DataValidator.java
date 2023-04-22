@@ -6,21 +6,31 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class DataValidator<D extends AbstractData> {
-    public final void validate(D data) {
+    //separate validateOnCreate and validateOnUpdate
+    public void validateOnCreate(D data) {
         if (data == null) {
             throw new InvalidDataException("Data object can't be null");
         }
-        log.info("Perform data validation for: " + data);
+        log.info("Perform data validation for creating data: " + data);
         ConstraintValidator.validateFields(data);
-        validateImpl(data);
+        validateOnCreateImpl(data);
+        validateCommon(data);
     }
-    protected abstract void validateImpl(D data);
 
-    protected void validateOnCreate(D data) {
-
+    public void validateOnUpdate(D data) {
+        if (data == null) {
+            throw new InvalidDataException("Data object can't be null");
+        }
+        log.info("Perform data validation for updating data: " + data);
+        ConstraintValidator.validateFields(data);
+        validateOnUpdateImpl(data);
+        validateCommon(data);
     }
-    protected void validateOnUpdate(D data) {
 
-    }
+    protected abstract void validateOnCreateImpl(D data);
+
+    protected abstract void validateOnUpdateImpl(D data);
+
+    protected abstract void validateCommon(D data);
 
 }

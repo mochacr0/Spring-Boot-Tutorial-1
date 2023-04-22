@@ -13,7 +13,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -33,12 +32,12 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         Assert.notNull(authentication, "No authentication provided");
         String username = authentication.getPrincipal().toString();
         String password = authentication.getCredentials().toString();
-        User existingUser = userService.findUserByName(username);
+        User existingUser = userService.findByName(username);
         if (existingUser == null) {
             throw new UsernameNotFoundException("User not found: " + username);
         }
         //authenticate with password
-        UserCredentials userCredentials = userCredentialsService.findUserCredentialsByUserId(existingUser.getId());
+        UserCredentials userCredentials = userCredentialsService.findByUserId(existingUser.getId());
         if (userCredentials == null) {
             throw new UsernameNotFoundException("User credentials not found");
         }

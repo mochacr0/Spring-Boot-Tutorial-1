@@ -8,5 +8,7 @@ import java.util.UUID;
 
 public interface UserCredentialsRepository extends JpaRepository<UserCredentialsEntity, UUID> {
     Optional<UserCredentialsEntity> findByUserId(UUID id);
+    Optional<UserCredentialsEntity> findByActivationToken(String activationToken);
+    void deleteByUserId(UUID userId);
 
 }

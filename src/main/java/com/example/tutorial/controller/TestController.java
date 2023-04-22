@@ -29,4 +29,16 @@ public class TestController {
         }
         return "OK";
     }
+
+    @Operation(tags = {"Testing"}, summary = "Test send template email", description = "Test send email")
+    @RequestMapping(value = "/sendTemplate", method = RequestMethod.GET)
+    String testSendTemplateMail () {
+        try {
+            mailService.sendTemplateMail();
+        }
+        catch(Exception e) {
+            throw e;
+        }
+        return "OK";
+    }
 }

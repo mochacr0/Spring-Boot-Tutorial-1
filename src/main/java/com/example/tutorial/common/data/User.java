@@ -6,6 +6,7 @@ import com.example.tutorial.model.ToEntity;
 import com.example.tutorial.model.UserEntity;
 import com.example.tutorial.security.oauth2.OAuth2UserInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,7 @@ public class User extends AbstractData implements ToEntity<UserEntity> {
 
     @Length(fieldName = "email")
     @Schema(title = "email", description = "User email", example = "nthai2001cr@gmail.com")
+    @Email
     private String email;
 
 //    @Length(fieldName = "password")

@@ -4,6 +4,7 @@ import com.example.tutorial.common.data.User;
 import com.example.tutorial.common.security.Authority;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Table(name = ModelConstants.USER_TABLE)
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class UserEntity extends AbstractEntity<User> {
     @Column(name = ModelConstants.NAME_COLUMN, unique = true)
     private String name;
@@ -18,8 +20,8 @@ public class UserEntity extends AbstractEntity<User> {
     @Column(name = ModelConstants.EMAIL_COLUMN, unique = true)
     private String email;
 
-    @Column(name = ModelConstants.PASSWORD_COLUMN)
-    private String password;
+//    @Column(name = ModelConstants.PASSWORD_COLUMN)
+//    private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(name = ModelConstants.AUTHORITY_COLUMN)

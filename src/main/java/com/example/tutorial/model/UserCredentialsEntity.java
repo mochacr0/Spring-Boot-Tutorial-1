@@ -1,14 +1,12 @@
 package com.example.tutorial.model;
 
 import com.example.tutorial.common.data.UserCredentials;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.boot.Banner;
 
 import java.util.UUID;
 
@@ -23,9 +21,11 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
     private UUID userId;
     @Column(name = ModelConstants.USER_CREDENTIALS_PASSWORD_COLUMN)
     private String password;
-    @Column(name = ModelConstants.USER_CREDENTIALS_ACTIVATE_TOKEN_COLUMN)
-    private String activateToken;
-    @Column(name = ModelConstants.USER_CREDENTIALS_RESET_PASSWORD_TOKEN_COLUMN)
+    @Column(name = ModelConstants.USER_CREDENTIALS_ACTIVATION_TOKEN_COLUMN, unique = true)
+    private String activationToken;
+    @Column(name = ModelConstants.USER_CREDENTIALS_ACTIVATION_TOKEN_EXPIRATION_MILLIS)
+    private long activationTokenExpirationMillis;
+    @Column(name = ModelConstants.USER_CREDENTIALS_RESET_PASSWORD_TOKEN_COLUMN, unique = true)
     private String resetPasswordToken;
     @Column(name = ModelConstants.USER_CREDENTIALS_FAILED_LOGIN_ATTEMPTS_TOKEN_COLUMN)
     private int failedLoginAttempts;
@@ -37,9 +37,10 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
     public UserCredentials toData() {
         UserCredentials data = new UserCredentials();
         data.setId(this.getId());
-        data.setUserId(this.getId());
+        data.setUserId(this.getUserId());
         data.setHashedPassword(this.getPassword());
-        data.setActivateToken(this.getActivateToken());
+        data.setActivationToken(this.getActivationToken());
+        data.setActivationTokenExpirationMillis(this.getActivationTokenExpirationMillis());
         data.setResetPasswordToken(this.getResetPasswordToken());
         data.setFailedLoginAttempts(this.getFailedLoginAttempts());
 //        data.setMaxFailedLoginAttempts(this.getMaxFailedLoginAttempts());
@@ -56,7 +57,9 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
         builder.append(", password=");
         builder.append(this.getPassword());
         builder.append(", activateToken=");
-        builder.append(this.getActivateToken());
+        builder.append(this.getActivationToken());
+        builder.append(", activationTokenExpirationMillis");
+        builder.append(this.getActivationTokenExpirationMillis());
         builder.append(", resetPasswordToken=");
         builder.append(this.getResetPasswordToken());
         builder.append(", createdAt=");

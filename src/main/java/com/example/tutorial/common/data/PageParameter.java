@@ -24,6 +24,10 @@ public class PageParameter {
         this.sortProperty = sortProperty;
         this.textSearch = textSearch;
     }
+
+    public PageParameter nextPageParameter() {
+        return new PageParameter(this.page + 1, this.pageSize, this.sortDirection, this.sortProperty, this.textSearch);
+    }
     public Sort toSort() {
         return Sort.by(Sort.Direction.fromString(sortDirection), sortProperty);
     }

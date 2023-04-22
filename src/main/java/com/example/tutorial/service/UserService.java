@@ -4,16 +4,16 @@ import com.example.tutorial.common.data.PageData;
 import com.example.tutorial.common.data.PageParameter;
 import com.example.tutorial.common.data.RegisterUserRequest;
 import com.example.tutorial.common.data.User;
-import org.springframework.data.domain.PageRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public interface UserService {
     PageData<User> findUsers(PageParameter pageParameter);
-    User saveUser(User user);
-    User findUserByName(String name);
-    User findUserById(UUID id);
-    User findUserByEmail(String email);
-    User registerUser(RegisterUserRequest user);
+    User save(User user);
+    User findByName(String name);
+    User findById(UUID id);
+    User findByEmail(String email);
+    User register(RegisterUserRequest user, HttpServletRequest request, boolean isMailRequired);
+    void deleteById(UUID id);
 }

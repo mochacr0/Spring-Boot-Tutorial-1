@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class DaoUtils {
     public static <D> PageData<D> toPageData(Page<? extends ToData<D>> page) {
-        List<D> data = page.getContent().stream().map(dataElement -> dataElement.toData()).collect(Collectors.toList());
+        List<D> data = page.getContent().stream().map(ToData::toData).collect(Collectors.toList());
+        log.info("-------------------------------------------------" + page.hasNext());
         return new PageData<>(page.hasNext(), page.getTotalElements(), page.getTotalPages(), data);
     }
     public static <D> D toData(ToData<D> entity) {
