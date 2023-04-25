@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,12 +47,13 @@ public class UserController {
                                @RequestParam(defaultValue = SORT_PROPERTY_DEFAULT_VALUE) String sortProperty)  {
         //no validate sortOrder
         PageData<User> data = userService.findUsers(new PageParameter(page, pageSize, sortDirection, sortProperty, ""));
-        log.info(data.toString());
         return data;
     }
 
+    @Operation(tags = {"User"}, summary = "Fetch the User object based on the provided userId")
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
-    User getUserById (@PathVariable(name = "userId") String userId) {
+    User getUserById (@Parameter(description = "A string value representing the user id", required = true)
+                      @PathVariable(name = "userId") String userId) {
         if (StringUtils.isEmpty(userId)) {
             throw new InvalidDataException("User ID should be specified");
         }
@@ -61,16 +63,18 @@ public class UserController {
     @Operation(tags = {"User"}, summary = "Update user", description = "Update the User. " +
                                                                         "Specify existing User Id to update user. " +
                                                                         "Referencing non-existing User Id will cause 'Not Found' error.")
-    @RequestMapping(value = "", method = RequestMethod.POST)
-    User saveUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    User saveUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE), description = "User payload to update")
                   @RequestBody User user) {
         return userService.save(user);
     }
 
-    @Operation(tags = {"User"}, summary = "Register new user", description = "Register new user. When creating user, platform generates User Id as time-based UUID. " +
-            "The newly created User Id will be present in the response. ")
+    @Operation(tags = {"User"}, summary = "Register new user", description = "Register new user. " +
+                                                                             "When creating user, platform generates User Id as time-based UUID. " +
+                                                                             "The newly created User Id will be present in the response. ")
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    User regsiterUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User registration payload", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+    User regsiterUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User registration payload",
+                                                                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
                       @RequestBody RegisterUserRequest registerUserRequest,
                       @Parameter(description = "A boolean indicates whether or not mail verification is required.")
                       @RequestParam(defaultValue = "false") boolean isMailRequired,
@@ -78,12 +82,19 @@ public class UserController {
         return userService.register(registerUserRequest, request, isMailRequired);
     }
 
+    @Operation(tags = {"User"}, summary = "Delete the User specified by userId and its credentials. A non-existent User Id will result in an error.")
     @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
-    void deleteUser(@PathVariable(name = "userId") String userId) {
+    void deleteUser(@Parameter(description = "A string value representing the user id", required = true)
+                    @PathVariable(name = "userId") String userId) {
         if (StringUtils.isEmpty(userId)) {
             throw new InvalidDataException("User ID should be specified");
         }
         userService.deleteById(UUID.fromString(userId));
+    }
+
+    @RequestMapping(value = "/test-delete", method = RequestMethod.DELETE)
+    void deleteUnverifiedUsers() {
+        userService.deleteUnverifiedUsers();
     }
 
 }

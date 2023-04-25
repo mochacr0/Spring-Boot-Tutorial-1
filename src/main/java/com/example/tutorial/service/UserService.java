@@ -16,4 +16,5 @@ public interface UserService {
     User findByEmail(String email);
     User register(RegisterUserRequest user, HttpServletRequest request, boolean isMailRequired);
     void deleteById(UUID id);
+    void deleteUnverifiedUsers();
 }

@@ -62,8 +62,6 @@ public class JwtTokenFactory {
     }
 
     private Claims parseJwtTokenClaims(String jwtToken) {
-        log.info(this.jwtSettings.getTokenSigningKeyString());
-        log.info(this.jwtSettings.getTokenSigningKey().toString());
         try {
             return Jwts
                     .parserBuilder()

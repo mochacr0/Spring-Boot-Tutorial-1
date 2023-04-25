@@ -45,6 +45,8 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
         data.setFailedLoginAttempts(this.getFailedLoginAttempts());
 //        data.setMaxFailedLoginAttempts(this.getMaxFailedLoginAttempts());
         data.setEnabled(this.isEnabled());
+        data.setCreatedAt(this.getCreatedAt());
+        data.setUpdatedAt(this.getUpdatedAt());
         return data;
     }
     @Override

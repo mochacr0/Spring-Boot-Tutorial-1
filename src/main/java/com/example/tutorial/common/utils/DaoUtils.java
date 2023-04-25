@@ -18,8 +18,11 @@ import java.util.stream.Collectors;
 public class DaoUtils {
     public static <D> PageData<D> toPageData(Page<? extends ToData<D>> page) {
         List<D> data = page.getContent().stream().map(ToData::toData).collect(Collectors.toList());
-        log.info("-------------------------------------------------" + page.hasNext());
         return new PageData<>(page.hasNext(), page.getTotalElements(), page.getTotalPages(), data);
+    }
+
+    public static <D> List<D> toListData(List<? extends ToData<D>> list) {
+        return list.stream().map(ToData::toData).collect(Collectors.toList());
     }
     public static <D> D toData(ToData<D> entity) {
         D data = null;
@@ -35,6 +38,4 @@ public class DaoUtils {
     public static Pageable toPageable(PageParameter pageParameter) {
         return PageRequest.of(pageParameter.getPage(), pageParameter.getPageSize(), pageParameter.toSort());
     }
-
-
 }

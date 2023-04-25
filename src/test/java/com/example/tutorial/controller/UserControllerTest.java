@@ -232,6 +232,22 @@ public class UserControllerTest extends AbstractControllerTest {
         performDelete(DELETE_USER_BY_ID_ROUTE, createdUser.getId()).andExpect(status().isOk());
         performGet(FIND_USER_BY_ID_ROUTE, createdUser.getId()).andExpect(status().isNotFound());
     }
+//    @Test
+    void testDeleteUnverifiedUsers() throws Exception {
+        List<User> createdUsers = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            RegisterUserRequest request = new RegisterUserRequest();
+            request.setName("usertest" + i);
+            request.setEmail("usertest" + i + "@gmail.com");
+            request.setPassword("Password");
+            request.setConfirmPassword("Password");
+            createdUsers.add(createUser(request));
+        }
+        performDelete(USER_ROUTE + "/test-delete").andExpect(status().isOk());
+        for (User createdUser : createdUsers) {
+            performGet(FIND_USER_BY_ID_ROUTE, createdUser.getId()).andExpect(status().isNotFound());
+        }
+    }
 
     private User createUser(String name, String email, String password, String confirmPassword) throws Exception {
         RegisterUserRequest request = new RegisterUserRequest();

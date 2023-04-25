@@ -18,15 +18,20 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @Slf4j
 public class UserServiceImpl extends DataBaseService<User, UserEntity> implements UserService {
-
+    @Autowired
+    private UserService userDeletionService;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -39,6 +44,8 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
     private MailService mailService;
     @Autowired
     private MailConfiguration mailConfiguration;
+    @Autowired
+    private ThreadPoolTaskExecutor taskExecutor;
 
     @Override
     public JpaRepository<UserEntity, UUID> getRepository() {
@@ -99,9 +106,7 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
             throw new InvalidDataException("Password and confirm password are not matched");
         }
         User user = new User(registerUserRequest);
-        //validate user
         userDataValidator.validateOnCreate(user);
-        //save user
         User savedUser = super.save(user);
         if (savedUser.getId() != null) {
             UserCredentials userCredentials = new UserCredentials();
@@ -109,7 +114,6 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
             userCredentials.setRawPassword(registerUserRequest.getPassword());
             if (isMailRequired) {
                 String activateToken = RandomStringUtils.randomAlphanumeric(this.DEFAULT_TOKEN_LENGTH);
-                //note: expiryTime for activateToken
                 userCredentials.setActivationToken(activateToken);
                 userCredentials.setActivationTokenExpirationMillis(System.currentTimeMillis() + mailConfiguration.getDefaultActivationTokenExpirationMillis());
             }
@@ -123,14 +127,31 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
         return savedUser;
     }
 
-    public void resentEmailActivationToken() {}
-
     @Override
     @Transactional
     public void deleteById(UUID id) {
         log.info("Performing UserService deleteById");
         userCredentialsService.deleteByUserId(id);
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public void deleteUnverifiedUsers() {
+        log.info("Performing UserService deleteUnverifiedUsers");
+        List<UserCredentials> userCredentialsList = userCredentialsService.findUnverifiedUserCredentials();
+        List<List<UserCredentials>> chunks = new ArrayList<>();
+        int chunkSize = 2;
+        for (int currentIndex = 0; currentIndex < userCredentialsList.size(); currentIndex += chunkSize) {
+            chunks.add(userCredentialsList.subList(currentIndex, Math.min(currentIndex + chunkSize, userCredentialsList.size())));
+        }
+        for (List<UserCredentials> chunk : chunks) {
+            taskExecutor.submit(() -> {
+                for (UserCredentials userCredentials : chunk) {
+                    userDeletionService.deleteById(userCredentials.getUserId());
+                }
+            });
+        }
+
     }
 
     private void validateRegisterPasswords(RegisterUserRequest request) {

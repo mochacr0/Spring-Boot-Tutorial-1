@@ -8,14 +8,15 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.Properties;
 
 @Configuration
 @ConfigurationProperties(prefix = "mailing")
 @Data
-@EnableAsync
 public class MailConfiguration {
     private String host;
     private int port;
@@ -40,13 +41,4 @@ public class MailConfiguration {
         return sender;
     }
 
-    @Bean
-    public AsyncTaskExecutor buildThreadPoolTaskExecutor() {
-        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(20);
-        taskExecutor.setMaxPoolSize(40);
-        taskExecutor.setQueueCapacity(50);
-        taskExecutor.initialize();
-        return taskExecutor;
-    }
 }

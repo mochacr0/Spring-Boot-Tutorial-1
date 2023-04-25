@@ -13,6 +13,7 @@ import org.springframework.boot.web.servlet.server.Encoding;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.web.util.UrlUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
@@ -35,7 +36,7 @@ public class MailServiceImpl implements MailService {
     @Autowired
     private Configuration freeMarkerConfiguration;
     @Autowired
-    private AsyncTaskExecutor mailServiceExecutor;
+    private ThreadPoolTaskExecutor mailServiceExecutor;
     @Autowired
     private MailConfiguration mailConfiguration;
 
