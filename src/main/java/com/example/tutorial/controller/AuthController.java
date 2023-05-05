@@ -1,5 +1,7 @@
 package com.example.tutorial.controller;
 
+import com.example.tutorial.config.SecuritySettingsConfiguration;
+import com.example.tutorial.config.UserPasswordPolicy;
 import com.example.tutorial.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     @Autowired
     private AuthService authService;
+    @Autowired
+    private SecuritySettingsConfiguration securitySettings;
 
     @Operation(tags = {"Auth"}, summary = "Activate user")
     @RequestMapping(value = "/activate", method = RequestMethod.POST)
@@ -32,5 +36,9 @@ public class AuthController {
         authService.resendActivationTokenByEmail(email, request);
     }
 
-
+    @Operation(tags = {"Auth"}, summary = "Get user password policy")
+    @RequestMapping(value = "/passwordPolicy", method = RequestMethod.GET)
+    UserPasswordPolicy getUserPasswordPolicy() {
+        return securitySettings.getPasswordPolicy();
+    }
 }

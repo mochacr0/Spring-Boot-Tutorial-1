@@ -23,7 +23,6 @@ public class MailConfiguration {
     private String username;
     private String password;
     private long timeout;
-    private long defaultActivationTokenExpirationMillis;
     @Bean
     public JavaMailSenderImpl buildJavaMailSenderImpl() {
         JavaMailSenderImpl sender = new JavaMailSenderImpl();

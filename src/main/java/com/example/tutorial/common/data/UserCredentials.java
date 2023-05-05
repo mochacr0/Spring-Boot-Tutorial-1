@@ -2,6 +2,7 @@ package com.example.tutorial.common.data;
 
 import com.example.tutorial.model.ToEntity;
 import com.example.tutorial.model.UserCredentialsEntity;
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,12 +29,18 @@ public class UserCredentials extends AbstractData implements ToEntity<UserCreden
     private String resetPasswordToken;
     @Schema(title = "Failed login attempts", description = "The number of times that user's login has failed")
     private int failedLoginAttempts;
-//    private int maxFailedLoginAttempts;
-    @Schema(title = "Is enabled", description = "A boolean value indicates whether or not the user account is enabled", defaultValue = "false")
+    @Schema(title = "Failed login lock expiration", description = "The number of milliseconds a user will be locked after exceeding the maximum number of failed login attempts")
+    private long failedLoginLockExpirationMillis;
+    @Schema(title = "Is email verified", description = "A boolean value indicates whether the user's email address has been verified", defaultValue = "false")
+    private boolean isVerified;
+    @Schema(title = "Is account enabled", description = "A boolean value indicates whether or not the user account is enabled", defaultValue = "false")
     private boolean isEnabled;
+    @Schema(title = "Additional Information", description = "A JSON value contains all additional information")
+    private JsonNode additionalInfo;
 
     public UserCredentials() {
         setFailedLoginAttempts(0);
+        setVerified(false);
         setEnabled(false);
     }
 
@@ -55,7 +62,11 @@ public class UserCredentials extends AbstractData implements ToEntity<UserCreden
         entity.setActivationToken(this.getActivationToken());
         entity.setActivationTokenExpirationMillis(this.getActivationTokenExpirationMillis());
         entity.setResetPasswordToken(this.getResetPasswordToken());
+        entity.setFailedLoginAttempts(this.getFailedLoginAttempts());
+        entity.setFailedLoginLockExpirationMillis(this.getFailedLoginLockExpirationMillis());
+        entity.setVerified(this.isVerified());
         entity.setEnabled(this.isEnabled());
+        entity.setAdditionalInfo(this.getAdditionalInfo());
         return entity;
     }
     @Override
@@ -71,11 +82,17 @@ public class UserCredentials extends AbstractData implements ToEntity<UserCreden
         builder.append(this.getHashedPassword());
         builder.append(", activateToken=");
         builder.append(this.getActivationToken());
-        builder.append(", activationTokenExpirationMillis");
+        builder.append(", activationTokenExpirationMillis=");
         builder.append(this.getActivationTokenExpirationMillis());
         builder.append(", resetPasswordToken=");
         builder.append(this.getResetPasswordToken());
-        builder.append(", isEnabled");
+        builder.append(", maxFailedLoginAttempts=");
+        builder.append(this.getFailedLoginAttempts());
+        builder.append(", failedLoginLockExpirationMillis=");
+        builder.append(this.getFailedLoginLockExpirationMillis());
+        builder.append(", isVerified=");
+        builder.append(this.isVerified());
+        builder.append(", isEnabled=");
         builder.append(this.isEnabled());
         builder.append(", createdAt=");
         builder.append(this.getCreatedAt());

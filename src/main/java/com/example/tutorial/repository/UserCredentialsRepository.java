@@ -15,8 +15,6 @@ public interface UserCredentialsRepository extends JpaRepository<UserCredentials
     Optional<UserCredentialsEntity> findByUserId(UUID id);
     Optional<UserCredentialsEntity> findByActivationToken(String activationToken);
     void deleteByUserId(UUID userId);
-    @Query("SELECT u FROM UserCredentialsEntity u WHERE u.isEnabled = FALSE AND u.activationTokenExpirationMillis < :currentTime")
+    @Query("SELECT u FROM UserCredentialsEntity u WHERE u.isVerified = FALSE AND u.activationTokenExpirationMillis < :currentTime")
     List<UserCredentialsEntity> findUnverifiedUsers(@Param("currentTime") long currentTime);
-
-
 }

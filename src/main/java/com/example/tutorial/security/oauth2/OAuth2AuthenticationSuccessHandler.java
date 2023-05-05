@@ -3,7 +3,8 @@ package com.example.tutorial.security.oauth2;
 import com.example.tutorial.common.data.RegisterUserRequest;
 import com.example.tutorial.common.data.User;
 import com.example.tutorial.common.security.SecurityUser;
-import com.example.tutorial.config.UserPasswordPolicyConfiguration;
+import com.example.tutorial.config.SecuritySettingsConfiguration;
+import com.example.tutorial.config.UserPasswordPolicy;
 import com.example.tutorial.security.JwtToken;
 import com.example.tutorial.security.JwtTokenFactory;
 import com.example.tutorial.service.UserService;
@@ -35,7 +36,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Autowired
     private UserService userService;
     @Autowired
-    private UserPasswordPolicyConfiguration passwordPolicy;
+    private SecuritySettingsConfiguration securitySettings;
     @Autowired
     private HttpCookieOAuth2AuthorizationRequestRepository authorizationRequestRepository;
 
@@ -60,6 +61,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private SecurityUser getOrCreateSecurityUserFromOAuth2User(OAuth2User oauth2User, String registrationId, HttpServletRequest request) {
         OAuth2UserInfo oauth2UserInfo = OAuth2UserInfoMapper.getOAuth2UserInfo(oauth2User.getAttributes(), registrationId);
         User user = userService.findByEmail(oauth2UserInfo.getEmail());
+        UserPasswordPolicy passwordPolicy = securitySettings.getPasswordPolicy();
         if (user == null) {
             RegisterUserRequest registerUserRequest = new RegisterUserRequest();
             PasswordGenerator passwordGenerator = new PasswordGenerator();

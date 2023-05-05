@@ -5,6 +5,7 @@ import com.example.tutorial.common.utils.DaoUtils;
 import com.example.tutorial.common.utils.UrlUtils;
 import com.example.tutorial.common.validator.DataValidator;
 import com.example.tutorial.config.MailConfiguration;
+import com.example.tutorial.config.SecuritySettingsConfiguration;
 import com.example.tutorial.exception.InvalidDataException;
 import com.example.tutorial.exception.ItemNotFoundException;
 import com.example.tutorial.model.UserEntity;
@@ -43,7 +44,7 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
     @Autowired
     private MailService mailService;
     @Autowired
-    private MailConfiguration mailConfiguration;
+    private SecuritySettingsConfiguration securitySettings;
     @Autowired
     private ThreadPoolTaskExecutor taskExecutor;
 
@@ -73,6 +74,7 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
 //            user.setPassword(encodedPassword);
 //        }
         return super.save(user);
+//        return super.save(user);
     }
 
     @Override
@@ -115,7 +117,7 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
             if (isMailRequired) {
                 String activateToken = RandomStringUtils.randomAlphanumeric(this.DEFAULT_TOKEN_LENGTH);
                 userCredentials.setActivationToken(activateToken);
-                userCredentials.setActivationTokenExpirationMillis(System.currentTimeMillis() + mailConfiguration.getDefaultActivationTokenExpirationMillis());
+                userCredentials.setActivationTokenExpirationMillis(System.currentTimeMillis() + securitySettings.getActivationTokenExpirationMillis());
             }
             //save credentials
             UserCredentials savedUserCredentials = userCredentialsService.create(userCredentials);
@@ -151,6 +153,19 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
                 }
             });
         }
+
+    }
+
+    @Override
+    public void activateUserCredentialsByUserId(UUID userId) {
+        log.info("Performing userService activateByName");
+        UserCredentials userCredentials = userCredentialsService.findByUserId(userId);
+        if (userCredentials == null) {
+            throw new ItemNotFoundException(String.format("Cannot find user credentials with given user ID [%s]", userId));
+        }
+        userCredentials.setVerified(true);
+        userCredentials.setEnabled(true);
+        userCredentialsService.save(userCredentials);
 
     }
 

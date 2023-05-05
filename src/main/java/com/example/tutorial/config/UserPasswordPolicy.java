@@ -2,22 +2,19 @@ package com.example.tutorial.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.passay.*;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
 
-//@Configuration
-//@ConfigurationProperties(prefix = "security.password-policy")
+@NoArgsConstructor
 @Getter
 @Setter
 @JsonIgnoreProperties({"$$beanFactory"})
-public class UserPasswordPolicyConfiguration {
+public class UserPasswordPolicy {
     private boolean whitespacesAllowed;
     private int minimumLength;
     private int minimumLowerCharacters;
@@ -53,7 +50,4 @@ public class UserPasswordPolicyConfiguration {
         }
         return passwordCharacterRules;
     }
-    //activateTokenExpiryTime
-    //resetPasswordTokenExpiryTime;
-
 }

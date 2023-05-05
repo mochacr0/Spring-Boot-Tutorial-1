@@ -1,10 +1,16 @@
 package com.example.tutorial.controller;
 
+import com.example.tutorial.common.data.RegisterUserRequest;
+import com.example.tutorial.common.data.User;
+import com.example.tutorial.security.JwtAccessToken;
+import com.example.tutorial.security.JwtToken;
+import com.example.tutorial.security.LoginRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -19,8 +25,13 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.Assert;
 
+import javax.xml.transform.Result;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
+
+import static com.example.tutorial.controller.ControllerTestConstants.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -32,17 +43,10 @@ public abstract class AbstractControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-    protected final MediaType CONTENT_TYPE = MediaType.APPLICATION_JSON;
-    protected final int NEGATIVE_INT_VALUE = Integer.MIN_VALUE;
-    protected final int ZERO_INT_VALUE = 0;
-    protected final String STRING_VALUE = "string";
-    protected final String INVALID_SORT_DIRECTION = "invalidDirection";
-    protected final String INVALID_SORT_PROPERTY = "theresNoWayThatAPropertyCanBeLikeThis";
-    protected final String DEFAULT_USER_EMAIL = "defaultuser@gmail.com";
-    protected final String DEFAULT_USER_NAME = "defaultuser";
-    protected final String DEFAULT_PASSWORD = "Defaultpassword";
-
-
+    @Value("${security.maxFailedLoginAttempts}")
+    protected int maxFailedLoginAttempts;
+    @Value("${security.failedLoginLockExpirationMillis}")
+    protected long failedLoginLockExpirationMillis;
 
 //    @SuppressWarnings("rawtypes")
 //    private HttpMessageConverter mappingJackson2HttpMessageConverter;
@@ -64,9 +68,6 @@ public abstract class AbstractControllerTest {
 //        Assert.notNull(this.mappingJackson2HttpMessageConverter, "JSON message convert can not be null");
 //    }
 
-    void setup() {
-    }
-
     public <T> T performGet(String urlTemplate, Class<T> responseClass, Object... urlVariables) throws Exception {
         return readResponse(performGet(urlTemplate, urlVariables), responseClass);
     }
@@ -80,11 +81,11 @@ public abstract class AbstractControllerTest {
         return mockMvc.perform(builder);
     }
 
-    public <T, D> T performPost(String urlTemplate, Class<T> responseClass, D content, Object... urlVariables) throws Exception {
+    public <T, V> T performPost(String urlTemplate, Class<T> responseClass, V content, Object... urlVariables) throws Exception {
         return readResponse(performPost(urlTemplate, content, urlVariables), responseClass);
     }
 
-    public <T> ResultActions performPost(String urlTemplate, T content, Object...urlVariables) throws Exception {
+    public <V> ResultActions performPost(String urlTemplate, V content, Object...urlVariables) throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post(urlTemplate, urlVariables);
         String contentJsonString;
         if (content != null) {
@@ -97,6 +98,21 @@ public abstract class AbstractControllerTest {
         }
         return mockMvc.perform(builder);
     }
+
+    public <T> T performPostWithEmptyBody(String urlTemplate, Class<T> responseClass, Object... urlVariables) throws Exception {
+        return readResponse(performPostWithEmptyBody(urlTemplate, urlVariables), responseClass);
+    }
+
+    public <V> ResultActions performPostWithEmptyBody(String urlTemplate, Object...urlVariables) throws Exception {
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post(urlTemplate, urlVariables);
+        return mockMvc.perform(builder);
+    }
+
+//    public ResultActions performPost(String urlTemplate, Object...urlVariables) throws Exception {
+//        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post(urlTemplate, urlVariables);
+//        String contentJsonString;
+//        return mockMvc.perform(builder);
+//    }
 
     public ResultActions performDelete(String urlTemplate, Object... urlVariables) throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.delete(urlTemplate, urlVariables);
@@ -111,5 +127,31 @@ public abstract class AbstractControllerTest {
     <T> T readResponse(ResultActions result, TypeReference<T> type) throws IOException {
         byte[] content = result.andReturn().getResponse().getContentAsByteArray();
         return objectMapper.readValue(content, type);
+    }
+
+    public JwtToken loginAndReturnTokenPair (String username, String password) throws Exception {
+        ResultActions result = performPost("/auth/login", new LoginRequest(username, password)).andExpect(status().isOk());
+        return readResponse(result, JwtAccessToken.class);
+    }
+
+    public ResultActions login (String username, String password) throws Exception {
+        return performPost("/auth/login", new LoginRequest(username, password));
+    }
+
+    protected User createUser(String name, String email, String password, String confirmPassword) throws Exception {
+        RegisterUserRequest request = new RegisterUserRequest();
+        request.setName(name);
+        request.setEmail(email);
+        request.setPassword(password);
+        request.setConfirmPassword(confirmPassword);
+        return performPost(REGISTER_USER_ROUTE, User.class, request);
+    }
+
+    protected User createUser(RegisterUserRequest request) throws Exception {
+        return performPost(REGISTER_USER_ROUTE, User.class, request);
+    }
+
+    protected void deleteUser(UUID userId) throws Exception {
+        performDelete(DELETE_USER_BY_ID_ROUTE, userId.toString()).andExpect(status().isOk());
     }
 }

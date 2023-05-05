@@ -17,4 +17,5 @@ public interface UserService {
     User register(RegisterUserRequest user, HttpServletRequest request, boolean isMailRequired);
     void deleteById(UUID id);
     void deleteUnverifiedUsers();
+    void activateUserCredentialsByUserId(UUID userId);
 }

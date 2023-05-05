@@ -41,10 +41,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         if (userCredentials == null) {
             throw new UsernameNotFoundException("User credentials not found");
         }
-        boolean isPasswordMatched = passwordEncoder.matches(password, userCredentials.getHashedPassword());
-        if (!isPasswordMatched) {
-            throw new BadCredentialsException("Authentication failed: Username or password not valid");
-        }
+        userCredentialsService.validatePassword(userCredentials, password);
         //password matched
         SecurityUser securityUser = new SecurityUser(existingUser);
         return new UsernamePasswordAuthenticationToken(securityUser, null, securityUser.getAuthorities());

@@ -97,4 +97,9 @@ public class UserController {
         userService.deleteUnverifiedUsers();
     }
 
+    @RequestMapping(value = "/{userId}/activate", method = RequestMethod.POST)
+    void activateUserCredentialsByUserId(@PathVariable(name = "userId") String userId) {
+        userService.activateUserCredentialsByUserId(UUID.fromString(userId));
+    }
+
 }

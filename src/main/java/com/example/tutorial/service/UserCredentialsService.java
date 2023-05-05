@@ -17,5 +17,5 @@ public interface UserCredentialsService {
     List<UserCredentials> findUnverifiedUserCredentials();
     void deleteById(UUID id);
     void deleteByUserId(UUID userId);
-
+    void validatePassword(UserCredentials userCredentials, String password);
 }

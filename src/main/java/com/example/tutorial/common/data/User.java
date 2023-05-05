@@ -85,7 +85,7 @@ public class User extends AbstractData implements ToEntity<UserEntity> {
         builder.append(this.name);
         builder.append(", email=");
         builder.append(this.email);
-        builder.append(", authority");
+        builder.append(", authority=");
         builder.append(this.authority.name());
         builder.append(", createdAt=");
         builder.append(this.createdAt);
@@ -101,7 +101,6 @@ public class User extends AbstractData implements ToEntity<UserEntity> {
         entity.setId(this.getId());
         entity.setName(this.getName());
         entity.setEmail(this.getEmail());
-//        entity.setPassword(this.getPassword());
         entity.setAuthority(this.getAuthority());
         return entity;
     }

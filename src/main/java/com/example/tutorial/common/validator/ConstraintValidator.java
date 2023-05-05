@@ -27,9 +27,9 @@ public class ConstraintValidator {
     }
     public static void validateFields(Object object) {
         Set<ConstraintViolation<Object>> constraintViolations = fieldsValidator.validate(object);
-        List<String> validationErrors = constraintViolations.stream().map(ConstraintViolation::getMessage).distinct().collect(Collectors.toList());
+        List<String> validationErrors = constraintViolations.stream().map(ConstraintViolation::getMessage).distinct().toList();
         if (!validationErrors.isEmpty()) {
-            throw new ValidationException("Validation error: " + validationErrors.get(0).toString());
+            throw new ValidationException("Validation error: " + validationErrors.get(0));
         }
     }
 }

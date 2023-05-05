@@ -1,12 +1,13 @@
 package com.example.tutorial.model;
 
 import com.example.tutorial.common.data.UserCredentials;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import com.example.tutorial.common.utils.JsonNodeStringConverter;
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.util.UUID;
 
@@ -29,10 +30,15 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
     private String resetPasswordToken;
     @Column(name = ModelConstants.USER_CREDENTIALS_FAILED_LOGIN_ATTEMPTS_TOKEN_COLUMN)
     private int failedLoginAttempts;
-//    @Column(name = ModelConstants.USER_CREDENTIALS_MAX_FAILED_LOGIN_ATTEMPTS_RESET_PASSWORD_TOKEN_COLUMN)
-//    private int maxFailedLoginAttempts;
+    @Column(name = ModelConstants.USER_CREDENTIALS_FAILED_LOGIN_LOCK_EXPIRATION_MILLIS)
+    private long failedLoginLockExpirationMillis;
+    @Column(name = ModelConstants.USER_CREDENTIALS_IS_VERIFIED_COLUMN)
+    private boolean isVerified;
     @Column(name = ModelConstants.USER_CREDENTIALS_IS_ENABLED_COLUMN)
     private boolean isEnabled;
+    @Column(name = ModelConstants.USER_CREDENTIALS_ADDITIONAL_INFO)
+    @Convert(converter = JsonNodeStringConverter.class)
+    private JsonNode additionalInfo;
     @Override
     public UserCredentials toData() {
         UserCredentials data = new UserCredentials();
@@ -43,10 +49,12 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
         data.setActivationTokenExpirationMillis(this.getActivationTokenExpirationMillis());
         data.setResetPasswordToken(this.getResetPasswordToken());
         data.setFailedLoginAttempts(this.getFailedLoginAttempts());
-//        data.setMaxFailedLoginAttempts(this.getMaxFailedLoginAttempts());
+        data.setFailedLoginLockExpirationMillis(this.getFailedLoginLockExpirationMillis());
+        data.setVerified(this.isVerified());
         data.setEnabled(this.isEnabled());
         data.setCreatedAt(this.getCreatedAt());
         data.setUpdatedAt(this.getUpdatedAt());
+        data.setAdditionalInfo(this.getAdditionalInfo());
         return data;
     }
     @Override
@@ -60,16 +68,21 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
         builder.append(this.getPassword());
         builder.append(", activateToken=");
         builder.append(this.getActivationToken());
-        builder.append(", activationTokenExpirationMillis");
+        builder.append(", activationTokenExpirationMillis=");
         builder.append(this.getActivationTokenExpirationMillis());
         builder.append(", resetPasswordToken=");
         builder.append(this.getResetPasswordToken());
+        builder.append(this.getResetPasswordToken());
+        builder.append(", maxFailedLoginAttempts=");
+        builder.append(this.getFailedLoginAttempts());
+        builder.append(", failedLoginLockExpirationMillis=");
+        builder.append(this.getFailedLoginLockExpirationMillis());
+        builder.append(", isVerified=");
+        builder.append(this.isVerified());
+        builder.append(", isEnabled=");
+        builder.append(this.isEnabled());
         builder.append(", createdAt=");
         builder.append(this.getCreatedAt());
-        builder.append(", updatedAt=");
-        builder.append(this.getUpdatedAt());
-        builder.append(", failedLoginAttempts=");
-        builder.append(this.getFailedLoginAttempts());
         builder.append(", updatedAt=");
         builder.append(this.getUpdatedAt());
         return builder.toString();

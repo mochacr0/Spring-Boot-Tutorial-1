@@ -2,7 +2,7 @@ package com.example.tutorial.common.validator;
 
 import com.example.tutorial.common.data.User;
 import com.example.tutorial.common.data.UserCredentials;
-import com.example.tutorial.config.UserPasswordPolicyConfiguration;
+import com.example.tutorial.config.SecuritySettingsConfiguration;
 import com.example.tutorial.exception.InvalidDataException;
 import com.example.tutorial.exception.ItemNotFoundException;
 import com.example.tutorial.service.UserCredentialsService;
@@ -17,7 +17,7 @@ import java.util.List;
 @Component
 public class UserCredentialsDataValidator extends DataValidator<UserCredentials>{
     @Autowired
-    private UserPasswordPolicyConfiguration passwordPolicy;
+    private SecuritySettingsConfiguration securitySettings;
     @Autowired
     private UserCredentialsService userCredentialsService;
     @Autowired
@@ -57,7 +57,7 @@ public class UserCredentialsDataValidator extends DataValidator<UserCredentials>
     }
 
     public void validateRawPassword(String rawPassword) {
-        List<Rule> passwordRules = passwordPolicy.getPasswordRules();
+        List<Rule> passwordRules = securitySettings.getPasswordPolicy().getPasswordRules();
         PasswordValidator validator = new PasswordValidator(passwordRules);
         RuleResult validateResult = validator.validate(new PasswordData(rawPassword));
         if (!validateResult.isValid()) {
