@@ -15,5 +15,6 @@ public class SecuritySettingsConfiguration {
     private int maxFailedLoginAttempts;
     private long failedLoginLockExpirationMillis;
     private long activationTokenExpirationMillis;
+    private long failedLoginIntervalMillis;
 
 }

@@ -33,13 +33,15 @@ public class ModelConstants {
     public static final String USER_CREDENTIALS_ACTIVATION_TOKEN_COLUMN = "activationToken";
     public static final String USER_CREDENTIALS_PASSWORD_COLUMN = "password";
     public static final String USER_CREDENTIALS_RESET_PASSWORD_TOKEN_COLUMN = "resetPasswordToken";
-    public static final String USER_CREDENTIALS_FAILED_LOGIN_ATTEMPTS_TOKEN_COLUMN = "failedLoginAttempts";
+    public static final String USER_CREDENTIALS_FAILED_LOGIN_HISTORY_TOKEN_COLUMN = "failedLoginHistory";
 //    public static final String USER_CREDENTIALS_MAX_FAILED_LOGIN_ATTEMPTS_RESET_PASSWORD_TOKEN_COLUMN = "maxFailedLoginAttempts";
     public static final String USER_CREDENTIALS_IS_VERIFIED_COLUMN = "isVerified";
     public static final String USER_CREDENTIALS_IS_ENABLED_COLUMN = "isEnabled";
-    public static final String USER_CREDENTIALS_ACTIVATION_TOKEN_EXPIRATION_MILLIS= "activationTokenExpirationMillis";
-    public static final String USER_CREDENTIALS_FAILED_LOGIN_LOCK_EXPIRATION_MILLIS = "failedLoginLockExpirationMillis";
-    public static final String USER_CREDENTIALS_ADDITIONAL_INFO = "additionalInfo";
+    public static final String USER_CREDENTIALS_ACTIVATION_TOKEN_EXPIRATION_MILLIS_COLUMN = "activationTokenExpirationMillis";
+    public static final String USER_CREDENTIALS_FAILED_LOGIN_LOCK_EXPIRATION_MILLIS_COLUMN = "failedLoginLockExpirationMillis";
+    public static final String USER_CREDENTIALS_FAILED_LOGIN_COUNT_COLUMN = "failedLoginCount";
+    public static final String USER_CREDENTIALS_FIRST_FAILED_LOGIN_ATTEMPT_MILLIS_COLUMN = "firstFailedLoginAttemptMillis";
+    public static final String USER_CREDENTIALS_ADDITIONAL_INFO_COLUMN = "additionalInfo";
 
 
 }

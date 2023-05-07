@@ -23,6 +23,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.ServletRequestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,9 +105,6 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
     public User register(RegisterUserRequest registerUserRequest, HttpServletRequest request, boolean isMailRequired) {
         log.info("Performing UserService register");
         validateRegisterPasswords(registerUserRequest);
-        if (!registerUserRequest.getPassword().equals(registerUserRequest.getConfirmPassword())) {
-            throw new InvalidDataException("Password and confirm password are not matched");
-        }
         User user = new User(registerUserRequest);
         userDataValidator.validateOnCreate(user);
         User savedUser = super.save(user);
@@ -164,7 +162,7 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
             throw new ItemNotFoundException(String.format("Cannot find user credentials with given user ID [%s]", userId));
         }
         userCredentials.setVerified(true);
-        userCredentials.setEnabled(true);
+//        userCredentials.setEnabled(true);
         userCredentialsService.save(userCredentials);
 
     }
@@ -175,6 +173,9 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
         }
         if (Strings.isEmpty(request.getConfirmPassword())) {
             throw new InvalidDataException("Confirm password field cannot be empty");
+        }
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new InvalidDataException("Password and confirm password are not matched");
         }
     }
 

@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
 
 import java.util.UUID;
 
@@ -24,19 +23,22 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
     private String password;
     @Column(name = ModelConstants.USER_CREDENTIALS_ACTIVATION_TOKEN_COLUMN, unique = true)
     private String activationToken;
-    @Column(name = ModelConstants.USER_CREDENTIALS_ACTIVATION_TOKEN_EXPIRATION_MILLIS)
+    @Column(name = ModelConstants.USER_CREDENTIALS_ACTIVATION_TOKEN_EXPIRATION_MILLIS_COLUMN)
     private long activationTokenExpirationMillis;
     @Column(name = ModelConstants.USER_CREDENTIALS_RESET_PASSWORD_TOKEN_COLUMN, unique = true)
     private String resetPasswordToken;
-    @Column(name = ModelConstants.USER_CREDENTIALS_FAILED_LOGIN_ATTEMPTS_TOKEN_COLUMN)
-    private int failedLoginAttempts;
-    @Column(name = ModelConstants.USER_CREDENTIALS_FAILED_LOGIN_LOCK_EXPIRATION_MILLIS)
-    private long failedLoginLockExpirationMillis;
+    @Column(name = ModelConstants.USER_CREDENTIALS_FAILED_LOGIN_HISTORY_TOKEN_COLUMN)
+    @Convert(converter = JsonNodeStringConverter.class)
+    private JsonNode failedLoginHistory;
+//    @Column(name = ModelConstants.USER_CREDENTIALS_FAILED_LOGIN_LOCK_EXPIRATION_MILLIS)
+//    private long failedLoginLockExpirationMillis;
+//    @Column(name = ModelConstants.USER_CREDENTIALS_FIRST_FAILED_LOGIN_ATTEMPTS_MILLIS)
+//    private long firstFailedLoginAttemptsMillis;
     @Column(name = ModelConstants.USER_CREDENTIALS_IS_VERIFIED_COLUMN)
     private boolean isVerified;
-    @Column(name = ModelConstants.USER_CREDENTIALS_IS_ENABLED_COLUMN)
-    private boolean isEnabled;
-    @Column(name = ModelConstants.USER_CREDENTIALS_ADDITIONAL_INFO)
+//    @Column(name = ModelConstants.USER_CREDENTIALS_IS_ENABLED_COLUMN)
+//    private boolean isEnabled;
+    @Column(name = ModelConstants.USER_CREDENTIALS_ADDITIONAL_INFO_COLUMN)
     @Convert(converter = JsonNodeStringConverter.class)
     private JsonNode additionalInfo;
     @Override
@@ -48,10 +50,11 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
         data.setActivationToken(this.getActivationToken());
         data.setActivationTokenExpirationMillis(this.getActivationTokenExpirationMillis());
         data.setResetPasswordToken(this.getResetPasswordToken());
-        data.setFailedLoginAttempts(this.getFailedLoginAttempts());
-        data.setFailedLoginLockExpirationMillis(this.getFailedLoginLockExpirationMillis());
+        data.setFailedLoginHistory(this.getFailedLoginHistory());
+//        data.setFailedLoginLockExpirationMillis(this.getFailedLoginLockExpirationMillis());
+//        data.setFirstFailedLoginAttemptsMillis(this.getFirstFailedLoginAttemptsMillis());
         data.setVerified(this.isVerified());
-        data.setEnabled(this.isEnabled());
+//        data.setEnabled(this.isEnabled());
         data.setCreatedAt(this.getCreatedAt());
         data.setUpdatedAt(this.getUpdatedAt());
         data.setAdditionalInfo(this.getAdditionalInfo());
@@ -72,15 +75,16 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
         builder.append(this.getActivationTokenExpirationMillis());
         builder.append(", resetPasswordToken=");
         builder.append(this.getResetPasswordToken());
-        builder.append(this.getResetPasswordToken());
-        builder.append(", maxFailedLoginAttempts=");
-        builder.append(this.getFailedLoginAttempts());
-        builder.append(", failedLoginLockExpirationMillis=");
-        builder.append(this.getFailedLoginLockExpirationMillis());
+        builder.append(", failedLoginHistory=");
+        builder.append(this.getFailedLoginHistory());
+//        builder.append(", failedLoginLockExpirationMillis=");
+//        builder.append(this.getFailedLoginLockExpirationMillis());
+//        builder.append(", firstFailedLoginAttempts=");
+//        builder.append(this.getFirstFailedLoginAttemptsMillis());
         builder.append(", isVerified=");
         builder.append(this.isVerified());
-        builder.append(", isEnabled=");
-        builder.append(this.isEnabled());
+//        builder.append(", isEnabled=");
+//        builder.append(this.isEnabled());
         builder.append(", createdAt=");
         builder.append(this.getCreatedAt());
         builder.append(", updatedAt=");

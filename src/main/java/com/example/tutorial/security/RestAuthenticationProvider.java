@@ -32,6 +32,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         Assert.notNull(authentication, "No authentication provided");
         String username = authentication.getPrincipal().toString();
         String password = authentication.getCredentials().toString();
+        RestAuthenticationDetails details = (RestAuthenticationDetails) authentication.getDetails();
         User existingUser = userService.findByName(username);
         if (existingUser == null) {
             throw new UsernameNotFoundException("User not found: " + username);
@@ -41,7 +42,7 @@ public class RestAuthenticationProvider implements AuthenticationProvider {
         if (userCredentials == null) {
             throw new UsernameNotFoundException("User credentials not found");
         }
-        userCredentialsService.validatePassword(userCredentials, password);
+        userCredentialsService.validatePassword(userCredentials, password, details.getClientIpAddress());
         //password matched
         SecurityUser securityUser = new SecurityUser(existingUser);
         return new UsernamePasswordAuthenticationToken(securityUser, null, securityUser.getAuthorities());

@@ -47,6 +47,8 @@ public abstract class AbstractControllerTest {
     protected int maxFailedLoginAttempts;
     @Value("${security.failedLoginLockExpirationMillis}")
     protected long failedLoginLockExpirationMillis;
+    @Value("${security.failedLoginIntervalMillis}")
+    protected long failedLoginIntervalMillis;
 
 //    @SuppressWarnings("rawtypes")
 //    private HttpMessageConverter mappingJackson2HttpMessageConverter;

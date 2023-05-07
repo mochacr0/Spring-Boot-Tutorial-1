@@ -1,7 +1,7 @@
 package com.example.tutorial.security;
 
 import com.example.tutorial.exception.AuthMethodNotSupportedException;
-import com.example.tutorial.exception.InvalidDataException;
+import com.example.tutorial.security.oauth2.RestAuthenticationDetailsSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
@@ -9,8 +9,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,6 +27,7 @@ public class RestLoginProcessingFilter extends AbstractAuthenticationProcessingF
     private final ObjectMapper mapper;
     private final AuthenticationSuccessHandler successHandler;
     private final AuthenticationFailureHandler failureHandler;
+    private final AuthenticationDetailsSource<HttpServletRequest, RestAuthenticationDetails> authenticationDetailsSource = new RestAuthenticationDetailsSource();
 
     public RestLoginProcessingFilter(String defaultFilterProcessUrl, AuthenticationSuccessHandler successHandler,
                                      AuthenticationFailureHandler failureHandler, ObjectMapper mapper) {
@@ -39,7 +40,7 @@ public class RestLoginProcessingFilter extends AbstractAuthenticationProcessingF
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
         if (!request.getMethod().equals(HttpMethod.POST.toString())) {
-            throw new AuthMethodNotSupportedException("Authentication method not supported: " + request.getMethod().toString());
+            throw new AuthMethodNotSupportedException("Authentication method not supported: " + request.getMethod());
         }
         LoginRequest loginRequest;
         try {
@@ -53,6 +54,7 @@ public class RestLoginProcessingFilter extends AbstractAuthenticationProcessingF
         }
         //setup token from request
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
+        token.setDetails(authenticationDetailsSource.buildDetails(request));
         return this.getAuthenticationManager().authenticate(token);
     }
 

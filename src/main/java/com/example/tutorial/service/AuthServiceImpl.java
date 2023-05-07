@@ -46,7 +46,7 @@ public class AuthServiceImpl extends AbstractService implements AuthService {
         }
         //valid activation token
         userCredentials.setVerified(true);
-        userCredentials.setEnabled(true);
+//        userCredentials.setEnabled(true);
         userCredentials.setActivationToken(null);
         userCredentials.setActivationTokenExpirationMillis(0);
         userCredentialsService.save(userCredentials);
