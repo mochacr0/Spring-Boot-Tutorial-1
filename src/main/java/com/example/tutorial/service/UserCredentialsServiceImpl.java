@@ -197,9 +197,4 @@ public class UserCredentialsServiceImpl extends DataBaseService<UserCredentials,
         log.info("Performing UserCredentials deleteById");
         userCredentialsRepository.deleteById(id);
     }
-
-    public void testJsonNode() {
-        JsonNode jsonNode = objectMapper.createObjectNode();
-    }
-
 }

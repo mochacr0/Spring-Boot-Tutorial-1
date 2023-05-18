@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -146,7 +147,7 @@ public abstract class AbstractControllerTest {
         request.setEmail(email);
         request.setPassword(password);
         request.setConfirmPassword(confirmPassword);
-        return performPost(REGISTER_USER_ROUTE, User.class, request);
+        return readResponse(performPost(REGISTER_USER_ROUTE, request).andExpect(status().isOk()), User.class);
     }
 
     protected User createUser(RegisterUserRequest request) throws Exception {
@@ -156,4 +157,13 @@ public abstract class AbstractControllerTest {
     protected void deleteUser(UUID userId) throws Exception {
         performDelete(DELETE_USER_BY_ID_ROUTE, userId.toString()).andExpect(status().isOk());
     }
+
+    public String getRandomUsername() {
+        return "user" + RandomStringUtils.randomAlphanumeric(5);
+    }
+
+    public String getRandomEmail() {
+        return "user" + RandomStringUtils.randomAlphanumeric(5) + "@gmail.com";
+    }
+
 }

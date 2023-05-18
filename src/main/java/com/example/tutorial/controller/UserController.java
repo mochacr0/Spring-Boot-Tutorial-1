@@ -34,7 +34,7 @@ public class UserController {
     private UserService userService;
 
     @Operation(tags = {"User"}, summary = "Returns a page of available users")
-    @RequestMapping(value = "", method = RequestMethod.GET)
+    @GetMapping(value = "")
     PageData<User> getUsers (@Parameter(description = PAGE_NUMBER_DESCRIPTION)
                                @RequestParam(defaultValue = PAGE_NUMBER_DEFAULT_STRING_VALUE) int page,
                                @Parameter(description = PAGE_SIZE_DESCRIPTION)
@@ -46,12 +46,11 @@ public class UserController {
                                @Parameter(description = SORT_PROPERTY_DESCRIPTION)
                                @RequestParam(defaultValue = SORT_PROPERTY_DEFAULT_VALUE) String sortProperty)  {
         //no validate sortOrder
-        PageData<User> data = userService.findUsers(new PageParameter(page, pageSize, sortDirection, sortProperty, ""));
-        return data;
+        return userService.findUsers(new PageParameter(page, pageSize, sortDirection, sortProperty, ""));
     }
 
     @Operation(tags = {"User"}, summary = "Fetch the User object based on the provided userId")
-    @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
+    @GetMapping(value = "/{userId}")
     User getUserById (@Parameter(description = "A string value representing the user id", required = true)
                       @PathVariable(name = "userId") String userId) {
         if (StringUtils.isEmpty(userId)) {
@@ -63,7 +62,7 @@ public class UserController {
     @Operation(tags = {"User"}, summary = "Update user", description = "Update the User. " +
                                                                         "Specify existing User Id to update user. " +
                                                                         "Referencing non-existing User Id will cause 'Not Found' error.")
-    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @PostMapping(value = "/update")
     User saveUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE), description = "User payload to update")
                   @RequestBody User user) {
         return userService.save(user);
@@ -72,7 +71,7 @@ public class UserController {
     @Operation(tags = {"User"}, summary = "Register new user", description = "Register new user. " +
                                                                              "When creating user, platform generates User Id as time-based UUID. " +
                                                                              "The newly created User Id will be present in the response. ")
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @PostMapping(value = "/register")
     User regsiterUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User registration payload",
                                                                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
                       @RequestBody RegisterUserRequest registerUserRequest,
@@ -83,7 +82,7 @@ public class UserController {
     }
 
     @Operation(tags = {"User"}, summary = "Delete the User specified by userId and its credentials. A non-existent User Id will result in an error.")
-    @RequestMapping(value = "/{userId}", method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/{userId}")
     void deleteUser(@Parameter(description = "A string value representing the user id", required = true)
                     @PathVariable(name = "userId") String userId) {
         if (StringUtils.isEmpty(userId)) {
@@ -92,12 +91,12 @@ public class UserController {
         userService.deleteById(UUID.fromString(userId));
     }
 
-    @RequestMapping(value = "/test-delete", method = RequestMethod.DELETE)
+    @DeleteMapping(value = "/test-delete")
     void deleteUnverifiedUsers() {
         userService.deleteUnverifiedUsers();
     }
 
-    @RequestMapping(value = "/{userId}/activate", method = RequestMethod.POST)
+    @PostMapping(value = "/{userId}/activate")
     void activateUserCredentialsByUserId(@PathVariable(name = "userId") String userId) {
         userService.activateUserCredentialsByUserId(UUID.fromString(userId));
     }

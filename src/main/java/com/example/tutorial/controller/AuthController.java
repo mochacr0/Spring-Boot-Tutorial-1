@@ -22,7 +22,7 @@ public class AuthController {
     private SecuritySettingsConfiguration securitySettings;
 
     @Operation(tags = {"Auth"}, summary = "Activate user")
-    @RequestMapping(value = "/activate", method = RequestMethod.POST)
+    @PostMapping(value = "/activate")
     void activateToken(
             @Parameter(description = "Activation token retrieved from email")
             @RequestParam String activationToken) {
@@ -30,14 +30,14 @@ public class AuthController {
     }
 
     @Operation(tags = {"Auth"}, summary = "Resend activation token")
-    @RequestMapping(value = "/activate/resend", method = RequestMethod.POST)
+    @PostMapping(value = "/activate/resend")
     void resendActivationToken(@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
                                @RequestBody String email, HttpServletRequest request) {
         authService.resendActivationTokenByEmail(email, request);
     }
 
     @Operation(tags = {"Auth"}, summary = "Get user password policy")
-    @RequestMapping(value = "/passwordPolicy", method = RequestMethod.GET)
+    @GetMapping(value = "/passwordPolicy")
     UserPasswordPolicy getUserPasswordPolicy() {
         return securitySettings.getPasswordPolicy();
     }

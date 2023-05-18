@@ -11,8 +11,8 @@ public class ControllerTestConstants {
     protected static final String INVALID_SORT_PROPERTY = "theresNoWayThatAPropertyCanBeLikeThis";
 
     //User controller test constants
-    protected static final String DEFAULT_USER_EMAIL = "defaultuser@gmail.com";
-    protected static final String DEFAULT_USER_NAME = "defaultuser";
+    protected static String DEFAULT_USER_EMAIL = "defaultuser@gmail.com";
+    protected static String DEFAULT_USER_NAME = "defaultuser";
     protected static final String DEFAULT_PASSWORD = "Defaultpassword";
     public static final String USER_ROUTE = "/users";
     public static final String REGISTER_USER_ROUTE = USER_ROUTE + "/register";

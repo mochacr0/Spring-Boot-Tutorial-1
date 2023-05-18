@@ -51,7 +51,8 @@ public class UserControllerTest extends AbstractControllerTest {
         @Test
         void testFindUsers() throws Exception {
             List<RegisterUserRequest> registerRequests = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
+            int totalUsers = 10;
+            for (int i = 0; i < totalUsers; i++) {
                 RegisterUserRequest request = new RegisterUserRequest();
                 request.setName("usertest" + i);
                 request.setEmail("usertest" + i + "@gmail.com");
@@ -65,7 +66,7 @@ public class UserControllerTest extends AbstractControllerTest {
             List<User> savedUsers = new ArrayList<>();
             PageData<User> data;
             do {
-                data = performGetWithReferencedType(FIND_USERS_ROUTE + "?page={page}&pageSize={pageSize}&sortOrder={sortOrder},sortProperty={sortProperty}",
+                data = performGetWithReferencedType(FIND_USERS_ROUTE + "?page={page}&pageSize={pageSize}&sortDirection={sortDirection}&sortProperty={sortProperty}",
                         new TypeReference<>(){},
                         currentPage, pageSize, "desc", "createdAt");
                 savedUsers.addAll(data.getData().stream().toList());
@@ -73,16 +74,19 @@ public class UserControllerTest extends AbstractControllerTest {
                     currentPage++;
                 }
             } while (data.hasNext());
+            savedUsers = savedUsers.subList(0, totalUsers);
             for (User savedUser : savedUsers) {
                 deleteUser(savedUser.getId());
             }
             savedUsers.sort(new UserComparator<>());
-    //        registerRequests.sort(new RegisterUserRequestComparator<>());
+//            registerRequests.sort(new RegisterUserRequestComparator<>());
             boolean areListsTheSame = true;
             for (int i = 0; i < registerRequests.size(); i++) {
                 if (!registerRequests.get(i).getName().equals(savedUsers.get(i).getName())
                         || !registerRequests.get(i).getEmail().equals(savedUsers.get(i).getEmail())) {
                     areListsTheSame = false;
+                    log.info("----------------" + registerRequests.get(i));
+                    log.info("----------------" + savedUsers.get(i));
                     break;
                 }
             }
@@ -96,11 +100,11 @@ public class UserControllerTest extends AbstractControllerTest {
         @TestInstance(TestInstance.Lifecycle.PER_CLASS)
         class RegisterUserWithExistedNameAndEmail {
             private User defaultUser;
-            @BeforeAll
+            @BeforeEach
             void setUp() throws Exception {
-                defaultUser = createUser(DEFAULT_USER_NAME, DEFAULT_USER_EMAIL, DEFAULT_PASSWORD, DEFAULT_PASSWORD);
+                defaultUser = createUser(getRandomUsername(), getRandomEmail(), DEFAULT_PASSWORD, DEFAULT_PASSWORD);
             }
-            @AfterAll
+            @AfterEach
             void tearDown() throws Exception {
                 deleteUser(defaultUser.getId());
             }
@@ -132,8 +136,8 @@ public class UserControllerTest extends AbstractControllerTest {
             @BeforeEach
             void setUp() {
                 request = new RegisterUserRequest();
-                request.setName(DEFAULT_USER_NAME);
-                request.setEmail(DEFAULT_USER_EMAIL);
+                request.setName(getRandomUsername());
+                request.setEmail(getRandomEmail());
                 request.setMatchedPasswords(DEFAULT_PASSWORD);
             }
             @Test
@@ -162,7 +166,7 @@ public class UserControllerTest extends AbstractControllerTest {
         void testRegisterUserWithInvalidFormatEmail() throws Exception {
             String invalidFormatEmail = "nguyentrihai.com";
             RegisterUserRequest request = new RegisterUserRequest();
-            request.setName(DEFAULT_USER_NAME);
+            request.setName(getRandomUsername());
             request.setEmail(invalidFormatEmail);
             request.setMatchedPasswords(DEFAULT_PASSWORD);
             performPost(REGISTER_USER_ROUTE, request)
@@ -175,8 +179,8 @@ public class UserControllerTest extends AbstractControllerTest {
             @BeforeEach
             void setUp() {
                 request = new RegisterUserRequest();
-                request.setName(DEFAULT_USER_NAME);
-                request.setEmail(DEFAULT_USER_EMAIL);
+                request.setName(getRandomUsername());
+                request.setEmail(getRandomEmail());
             }
             @Test
             void testRegisterUserWithUnmatchedPasswords() throws Exception {
@@ -202,8 +206,8 @@ public class UserControllerTest extends AbstractControllerTest {
         @Test
         void testRegisterUserWithValidBody() throws Exception {
             RegisterUserRequest request = new RegisterUserRequest();
-            request.setName(DEFAULT_USER_NAME);
-            request.setEmail(DEFAULT_USER_EMAIL);
+            request.setName(getRandomUsername());
+            request.setEmail(getRandomEmail());
             request.setPassword(DEFAULT_PASSWORD);
             request.setConfirmPassword(DEFAULT_PASSWORD);
             User user = readResponse(performPost(USER_ROUTE + "/register", request).andExpect(status().isOk()), User.class);
@@ -224,10 +228,10 @@ public class UserControllerTest extends AbstractControllerTest {
 
     @Test
     void testActivateUserCredentialsByUserId() throws Exception {
-        User user = createUser(DEFAULT_USER_NAME, DEFAULT_USER_EMAIL, DEFAULT_PASSWORD, DEFAULT_PASSWORD);
+        User user = createUser(getRandomUsername(), getRandomEmail(), DEFAULT_PASSWORD, DEFAULT_PASSWORD);
         //note: case invalid uuid
-        performPostWithEmptyBody(FIND_USER_BY_ID_ROUTE + "/activate", user.getId().toString());
-        loginAndReturnTokenPair(DEFAULT_USER_NAME, DEFAULT_PASSWORD);
+        performPostWithEmptyBody(FIND_USER_BY_ID_ROUTE + "/activate", user.getId().toString()).andExpect(status().isOk());
+        loginAndReturnTokenPair(user.getName(), DEFAULT_PASSWORD);
         deleteUser(user.getId());
     }
 
@@ -252,7 +256,7 @@ public class UserControllerTest extends AbstractControllerTest {
 
         @Override
         public int compare(T o1, T o2) {
-            return o1.getName().compareTo(o2.getName());
+            return o1.getCreatedAt().compareTo(o2.getCreatedAt());
         }
     }
 
