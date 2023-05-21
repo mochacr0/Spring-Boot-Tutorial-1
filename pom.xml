@@ -15,6 +15,7 @@
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>
+<!--		<start-class>com.example.tutorial.TutorialApplication</start-class>-->
 	</properties>
 	<dependencies>
 		<dependency>
@@ -122,6 +123,7 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+					<mainClass>com.example.tutorial.TutorialApplication</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
