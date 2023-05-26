@@ -1,5 +1,6 @@
 package com.example.tutorial.controller;
 
+import com.example.tutorial.common.data.ResendActivationEmailRequest;
 import com.example.tutorial.config.SecuritySettingsConfiguration;
 import com.example.tutorial.config.UserPasswordPolicy;
 import com.example.tutorial.service.AuthService;
@@ -32,8 +33,8 @@ public class AuthController {
     @Operation(tags = {"Auth"}, summary = "Resend activation token")
     @PostMapping(value = "/activate/resend")
     void resendActivationToken(@io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
-                               @RequestBody String email, HttpServletRequest request) {
-        authService.resendActivationTokenByEmail(email, request);
+                               @RequestBody ResendActivationEmailRequest resendRequest, HttpServletRequest request) {
+        authService.resendActivationTokenByEmail(resendRequest.getEmail(), request);
     }
 
     @Operation(tags = {"Auth"}, summary = "Get user password policy")

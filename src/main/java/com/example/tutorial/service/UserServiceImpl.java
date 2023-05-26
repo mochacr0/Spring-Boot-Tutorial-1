@@ -162,7 +162,6 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
             throw new ItemNotFoundException(String.format("Cannot find user credentials with given user ID [%s]", userId));
         }
         userCredentials.setVerified(true);
-//        userCredentials.setEnabled(true);
         userCredentialsService.save(userCredentials);
 
     }
