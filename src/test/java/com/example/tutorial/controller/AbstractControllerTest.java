@@ -8,27 +8,19 @@ import com.example.tutorial.security.LoginRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.util.Assert;
 
-import javax.xml.transform.Result;
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 import static com.example.tutorial.controller.ControllerTestConstants.*;
@@ -50,6 +42,7 @@ public abstract class AbstractControllerTest {
     protected long failedLoginLockExpirationMillis;
     @Value("${security.failedLoginIntervalMillis}")
     protected long failedLoginIntervalMillis;
+    private String accessToken;
 
 //    @SuppressWarnings("rawtypes")
 //    private HttpMessageConverter mappingJackson2HttpMessageConverter;
@@ -81,6 +74,7 @@ public abstract class AbstractControllerTest {
 
     public ResultActions performGet(String urlTemplate, Object... urlVariables) throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get(urlTemplate, urlVariables);
+        setJwtToken(builder);
         return mockMvc.perform(builder);
     }
 
@@ -90,6 +84,7 @@ public abstract class AbstractControllerTest {
 
     public <V> ResultActions performPost(String urlTemplate, V content, Object...urlVariables) throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post(urlTemplate, urlVariables);
+        setJwtToken(builder);
         String contentJsonString;
         if (content != null) {
             try {
@@ -108,6 +103,7 @@ public abstract class AbstractControllerTest {
 
     public <V> ResultActions performPostWithEmptyBody(String urlTemplate, Object...urlVariables) throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post(urlTemplate, urlVariables);
+        setJwtToken(builder);
         return mockMvc.perform(builder);
     }
 
@@ -119,6 +115,7 @@ public abstract class AbstractControllerTest {
 
     public ResultActions performDelete(String urlTemplate, Object... urlVariables) throws Exception {
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.delete(urlTemplate, urlVariables);
+        setJwtToken(builder);
         return mockMvc.perform(builder);
     }
 
@@ -132,12 +129,23 @@ public abstract class AbstractControllerTest {
         return objectMapper.readValue(content, type);
     }
 
-    public JwtToken loginAndReturnTokenPair (String username, String password) throws Exception {
+    public void login (String username, String password) throws Exception {
+        resetJwtToken();
         ResultActions result = performPost("/auth/login", new LoginRequest(username, password)).andExpect(status().isOk());
-        return readResponse(result, JwtAccessToken.class);
+        this.accessToken = readResponse(result, JwtAccessToken.class).getValue();
     }
 
-    public ResultActions login (String username, String password) throws Exception {
+    public void resetJwtToken() {
+        this.accessToken = null;
+    }
+
+    public void setJwtToken(MockHttpServletRequestBuilder builder) {
+        if (this.accessToken != null) {
+            builder.header("Authorization", "Bearer " + this.accessToken);
+        }
+    }
+
+    public ResultActions performLogin(String username, String password) throws Exception {
         return performPost("/auth/login", new LoginRequest(username, password));
     }
 

@@ -1,8 +1,10 @@
 package com.example.tutorial.controller;
 
+import com.example.tutorial.common.data.ChangePasswordRequest;
 import com.example.tutorial.common.data.ResendActivationEmailRequest;
 import com.example.tutorial.config.SecuritySettingsConfiguration;
 import com.example.tutorial.config.UserPasswordPolicy;
+import com.example.tutorial.security.JwtToken;
 import com.example.tutorial.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,5 +43,11 @@ public class AuthController {
     @GetMapping(value = "/passwordPolicy")
     UserPasswordPolicy getUserPasswordPolicy() {
         return securitySettings.getPasswordPolicy();
+    }
+
+    @Operation(tags = {"Auth"}, summary = "Request change password token")
+    @PostMapping(value = "/changePassword")
+    JwtToken changePassword(@RequestBody ChangePasswordRequest request) {
+        return authService.changePassword(request);
     }
 }

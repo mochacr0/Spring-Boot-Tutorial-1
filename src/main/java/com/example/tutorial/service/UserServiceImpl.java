@@ -4,7 +4,6 @@ import com.example.tutorial.common.data.*;
 import com.example.tutorial.common.utils.DaoUtils;
 import com.example.tutorial.common.utils.UrlUtils;
 import com.example.tutorial.common.validator.DataValidator;
-import com.example.tutorial.config.MailConfiguration;
 import com.example.tutorial.config.SecuritySettingsConfiguration;
 import com.example.tutorial.exception.InvalidDataException;
 import com.example.tutorial.exception.ItemNotFoundException;
@@ -13,17 +12,14 @@ import com.example.tutorial.repository.UserRepository;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.ServletRequestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +100,7 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
     @Transactional
     public User register(RegisterUserRequest registerUserRequest, HttpServletRequest request, boolean isMailRequired) {
         log.info("Performing UserService register");
-        validateRegisterPasswords(registerUserRequest);
+        validatePasswords(registerUserRequest.getPassword(), registerUserRequest.getConfirmPassword());
         User user = new User(registerUserRequest);
         userDataValidator.validateOnCreate(user);
         User savedUser = super.save(user);
@@ -164,18 +160,6 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
         userCredentials.setVerified(true);
         userCredentialsService.save(userCredentials);
 
-    }
-
-    private void validateRegisterPasswords(RegisterUserRequest request) {
-        if (Strings.isEmpty(request.getPassword())) {
-            throw new InvalidDataException("Password field cannot be empty");
-        }
-        if (Strings.isEmpty(request.getConfirmPassword())) {
-            throw new InvalidDataException("Confirm password field cannot be empty");
-        }
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new InvalidDataException("Password and confirm password are not matched");
-        }
     }
 
 }

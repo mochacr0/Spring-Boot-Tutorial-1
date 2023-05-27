@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Date;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -26,7 +27,8 @@ public class JwtTokenFactory {
 
     @Autowired
     private JwtTokenExtractor jwtTokenExtractor;
-    private String SCOPES = "scopes";
+    private final String SCOPES = "scopes";
+    private final String USER_ID = "userId";
 
     public JwtToken createAccessToken(SecurityUser securityUser) {
         JwtBuilder jwtBuilder = setUpToken(securityUser);
@@ -42,6 +44,7 @@ public class JwtTokenFactory {
         List<String> scopes = securityUser.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
         Claims claims = Jwts.claims().setSubject(securityUser.getName());
         claims.put(SCOPES, scopes);
+        claims.put(USER_ID, securityUser.getId().toString());
         ZonedDateTime currentTime = ZonedDateTime.now();
         return Jwts.builder()
                 .setClaims(claims)
@@ -55,7 +58,9 @@ public class JwtTokenFactory {
         //set up new SecurityUser;
         String subject = claims.getSubject();
         List<String> scopes = claims.get(SCOPES, List.class);
+        String userId = claims.get(USER_ID, String.class);
         SecurityUser securityUser = new SecurityUser();
+        securityUser.setId(UUID.fromString(userId));
         securityUser.setName(subject);
         securityUser.setAuthority(Authority.parseFromString(scopes.get(0)));
         return securityUser;

@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.io.IOException;
 
@@ -25,8 +26,8 @@ public class JwtAuthenticationProcessingFilter extends AbstractAuthenticationPro
     private final AuthenticationFailureHandler failureHandler;
     private final JwtTokenExtractor tokenExtractor;
 
-    public JwtAuthenticationProcessingFilter(String defaultFilterProcessUrl, AuthenticationFailureHandler failureHandler, JwtTokenExtractor tokenExtractor) {
-        super(defaultFilterProcessUrl);
+    public JwtAuthenticationProcessingFilter(RequestMatcher matcher, AuthenticationFailureHandler failureHandler, JwtTokenExtractor tokenExtractor) {
+        super(matcher);
         this.failureHandler = failureHandler;
         this.tokenExtractor = tokenExtractor;
     }

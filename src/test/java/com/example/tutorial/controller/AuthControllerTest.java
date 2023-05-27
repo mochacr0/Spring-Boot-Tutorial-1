@@ -1,17 +1,11 @@
 package com.example.tutorial.controller;
 
+import com.example.tutorial.common.data.ChangePasswordRequest;
 import com.example.tutorial.common.data.User;
 import com.example.tutorial.service.UserService;
-import jakarta.xml.bind.annotation.XmlType;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.UUID;
 
 import static com.example.tutorial.controller.ControllerTestConstants.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -24,7 +18,7 @@ public class AuthControllerTest extends AbstractControllerTest {
     private UserService userService;
     @Test
     void testGetUserPasswordPolicy() throws Exception {
-        performGet("/auth/passwordPolicy").andExpect(status().isOk());
+        performGet(AUTH_ROUTE + "/passwordPolicy").andExpect(status().isOk());
     }
 
     @Nested
@@ -48,49 +42,129 @@ public class AuthControllerTest extends AbstractControllerTest {
 
         @Test
         void testLoginWithValidCredentials() throws Exception {
-            login(user.getName(), DEFAULT_PASSWORD).andExpect(status().isOk());
+            performLogin(user.getName(), DEFAULT_PASSWORD).andExpect(status().isOk());
+        }
+
+        @Test
+        void testLoginWithMissingUsername() throws Exception {
+            performLogin(null, DEFAULT_PASSWORD).andExpect(status().isUnauthorized());
+            performLogin("", DEFAULT_PASSWORD).andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void testLoginWithMissingPassword() throws Exception {
+            performLogin(user.getName(), null).andExpect(status().isUnauthorized());
+            performLogin(user.getName(), "").andExpect(status().isUnauthorized());
         }
 
         @Test
         void testLoginWithFailedLoginLock() throws Exception {
             //failed maximum times, should return bad credentials
             for (int i = 0; i < maxFailedLoginAttempts; i++) {
-                login(user.getName(), INVALID_PASSWORD)
+                performLogin(user.getName(), INVALID_PASSWORD)
                         .andExpect(status().isUnauthorized())
                         .andExpect(jsonPath("$.message", Matchers.is(BAD_CREDENTIALS_EXCEPTION_MESSAGE)));
             }
             //exceeded maximum allowed attempts, should return locked
-            login(user.getName(), INVALID_PASSWORD)
+            performLogin(user.getName(), INVALID_PASSWORD)
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.message", Matchers.is(LOCKED_EXCEPTION_MESSAGE)));
             //Wait until the expiration time has passed
             Thread.sleep(failedLoginLockExpirationMillis);
             //Now login should return ok
-            login(user.getName(), DEFAULT_PASSWORD).andExpect(status().isOk());
+            performLogin(user.getName(), DEFAULT_PASSWORD).andExpect(status().isOk());
         }
 
         @Test
         void testLoginFailMultipleTimesButNotWithinTheSameInterval() throws Exception{
             //test login fail multiple times but not within the same interval
             //first failed login
-            login(user.getName(), INVALID_PASSWORD)
+            performLogin(user.getName(), INVALID_PASSWORD)
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.message", Matchers.is(BAD_CREDENTIALS_EXCEPTION_MESSAGE)));
             //Wait until the interval time has passed
             Thread.sleep(failedLoginIntervalMillis);
             //then try to fail maximum times, should return bad credentials
             for (int i = 0; i < maxFailedLoginAttempts; i++) {
-                login(user.getName(), INVALID_PASSWORD)
+                performLogin(user.getName(), INVALID_PASSWORD)
                         .andExpect(status().isUnauthorized())
                         .andExpect(jsonPath("$.message", Matchers.is(BAD_CREDENTIALS_EXCEPTION_MESSAGE)));
             }
             //should return locked
-            login(user.getName(), INVALID_PASSWORD)
+            performLogin(user.getName(), INVALID_PASSWORD)
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.message", Matchers.is(LOCKED_EXCEPTION_MESSAGE)));
         }
     }
 
+    @Nested
+    @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+    class ChangePasswordTest {
+        private User user;
+        private ChangePasswordRequest changePasswordRequest;
+        private final String NEW_PASSWORD = "new" + DEFAULT_PASSWORD;
 
+        @BeforeAll
+        void setUpRequest() {
+            changePasswordRequest = new ChangePasswordRequest();
+            changePasswordRequest.setCurrentPassword(DEFAULT_PASSWORD);
+            changePasswordRequest.setNewPassword(NEW_PASSWORD);
+            changePasswordRequest.setConfirmPassword(NEW_PASSWORD);
+        }
+        @BeforeEach
+        void setUp() throws Exception {
+            user = createUser(getRandomUsername(), getRandomEmail(), DEFAULT_PASSWORD, DEFAULT_PASSWORD);
+            performPostWithEmptyBody(FIND_USER_BY_ID_ROUTE + "/activate", user.getId().toString());
+            login(user.getName(),DEFAULT_PASSWORD);
+        }
 
+        @BeforeEach
+        void tearDown() throws Exception {
+            if (user != null) {
+                deleteUser(user.getId());
+            }
+        }
+        @Test
+        void testChangePasswordWithInvalidCurrentPassword() throws Exception {
+            //current password is empty
+            changePasswordRequest.setCurrentPassword(null);
+            performPost(AUTH_ROUTE + "/changePassword",changePasswordRequest).andExpect(status().isBadRequest());
+            changePasswordRequest.setCurrentPassword("");
+            performPost(AUTH_ROUTE + "/changePassword",changePasswordRequest).andExpect(status().isBadRequest());
+            //current password is not matched
+            changePasswordRequest.setCurrentPassword("not" + DEFAULT_PASSWORD);
+            performPost(AUTH_ROUTE + "/changePassword",changePasswordRequest).andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void testChangePasswordWithInvalidNewPassword() throws Exception {
+            //new password is empty
+            changePasswordRequest.setNewPassword(null);
+            performPost(AUTH_ROUTE + "/changePassword",changePasswordRequest).andExpect(status().isBadRequest());
+            changePasswordRequest.setNewPassword("");
+            performPost(AUTH_ROUTE + "/changePassword",changePasswordRequest).andExpect(status().isBadRequest());
+            //current password and new password are the same
+            changePasswordRequest.setNewPassword(DEFAULT_PASSWORD);
+            performPost(AUTH_ROUTE + "/changePassword",changePasswordRequest).andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void testChangePasswordWithInvalidConfirmPassword() throws Exception {
+            //confirm password is empty
+            changePasswordRequest.setConfirmPassword(null);
+            performPost(AUTH_ROUTE + "/changePassword",changePasswordRequest).andExpect(status().isBadRequest());
+            changePasswordRequest.setConfirmPassword("");
+            performPost(AUTH_ROUTE + "/changePassword",changePasswordRequest).andExpect(status().isBadRequest());
+            //new password and confirm password are not matched
+            changePasswordRequest.setConfirmPassword("Not" + NEW_PASSWORD);
+            performPost(AUTH_ROUTE + "/changePassword",changePasswordRequest).andExpect(status().isBadRequest());
+        }
+
+        @Test
+        void testChangePasswordWithValidBody() throws Exception {
+            performPost(AUTH_ROUTE + "/changePassword",changePasswordRequest).andExpect(status().isOk());
+            performLogin(user.getName(), NEW_PASSWORD).andExpect(status().isOk());
+        }
+
+    }
 }

@@ -26,6 +26,10 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class TutorialSecurityConfiguration {
@@ -92,7 +96,10 @@ public class TutorialSecurityConfiguration {
     }
 
     public JwtAuthenticationProcessingFilter buildJwtAuthenticationProcessingFilter() {
-        JwtAuthenticationProcessingFilter filter = new JwtAuthenticationProcessingFilter("/users", restAuthenticationFailureHandler, jwtTokenExtractor);
+        String processingPath = "/**";
+        List<String> skipPaths = new ArrayList<>();
+        skipPaths.addAll(Arrays.asList("/auth/login", "/users/**"));
+        JwtAuthenticationProcessingFilter filter = new JwtAuthenticationProcessingFilter(new SkipPathRequestMatcher(skipPaths, processingPath), restAuthenticationFailureHandler, jwtTokenExtractor);
         filter.setAuthenticationManager(this.authenticationManager);
         return filter;
     }
@@ -114,7 +121,7 @@ public class TutorialSecurityConfiguration {
                 .anyRequest().permitAll()
                 .and()
             .addFilterBefore(buildRestLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
-            //.addFilterBefore(buildJwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(buildJwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
             .oauth2Login()
                 .authorizationEndpoint()
                     .authorizationRequestRepository(this.authorizationRequestRepository)

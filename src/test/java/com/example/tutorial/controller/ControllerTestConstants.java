@@ -19,4 +19,7 @@ public class ControllerTestConstants {
     public static final String FIND_USERS_ROUTE = USER_ROUTE;
     public static final String FIND_USER_BY_ID_ROUTE = USER_ROUTE + "/{userId}";
     public static final String DELETE_USER_BY_ID_ROUTE = USER_ROUTE + "/{userId}";
+
+    //Auth controller test constants
+    public static final String AUTH_ROUTE = "/auth";
 }

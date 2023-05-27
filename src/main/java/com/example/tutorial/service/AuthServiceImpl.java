@@ -1,17 +1,24 @@
 package com.example.tutorial.service;
 
+import com.example.tutorial.common.data.ChangePasswordRequest;
 import com.example.tutorial.common.data.User;
 import com.example.tutorial.common.data.UserCredentials;
+import com.example.tutorial.common.security.SecurityUser;
 import com.example.tutorial.common.utils.UrlUtils;
 import com.example.tutorial.config.MailConfiguration;
 import com.example.tutorial.config.SecuritySettingsConfiguration;
 import com.example.tutorial.exception.IncorrectParameterException;
+import com.example.tutorial.exception.InvalidDataException;
 import com.example.tutorial.exception.ItemNotFoundException;
+import com.example.tutorial.security.JwtToken;
+import com.example.tutorial.security.JwtTokenFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,6 +34,10 @@ public class AuthServiceImpl extends AbstractService implements AuthService {
     private MailService mailService;
     @Autowired
     private SecuritySettingsConfiguration securitySettings;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtTokenFactory tokenFactory;
     @Override
     public void activateEmail(String activationToken) {
         log.info("Performing service activateEmail");
@@ -75,5 +86,30 @@ public class AuthServiceImpl extends AbstractService implements AuthService {
         UserCredentials savedUserCredentials = userCredentialsService.save(userCredentials);
         String activationLink = String.format(this.ACTIVATION_URL_PATTERN, UrlUtils.getBaseUrl(request), savedUserCredentials.getActivationToken());
         mailService.sendActivationMail(email, activationLink);
+    }
+
+    @Override
+    public JwtToken changePassword(ChangePasswordRequest request) {
+        log.info("Performing service changePassword");
+        if (StringUtils.isEmpty(request.getCurrentPassword())) {
+            throw new InvalidDataException("Current password cannot be empty");
+        }
+        validatePasswords(request.getNewPassword(), request.getConfirmPassword());
+        SecurityUser currentUser = this.getCurrentUser();
+        UserCredentials userCredentials = userCredentialsService.findByUserId(currentUser.getId());
+        if (userCredentials == null) {
+            throw new ItemNotFoundException("Unable to find user credentials for current user");
+        }
+        if (!passwordEncoder.matches(request.getCurrentPassword(), userCredentials.getHashedPassword())) {
+            throw new InvalidDataException("Current password is not matched");
+        }
+        if (!securitySettings.getPasswordPolicy().isRepeatedPasswordAllowed() &&
+                request.getCurrentPassword().equals(request.getNewPassword())) {
+            throw new InvalidDataException("New password must be different from the current password");
+        }
+        userCredentials.setRawPassword(request.getNewPassword());
+        userCredentials.setHashedPassword(passwordEncoder.encode(request.getNewPassword()));
+        userCredentialsService.save(userCredentials);
+        return tokenFactory.createAccessToken(currentUser);
     }
 }

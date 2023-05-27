@@ -231,7 +231,7 @@ public class UserControllerTest extends AbstractControllerTest {
         User user = createUser(getRandomUsername(), getRandomEmail(), DEFAULT_PASSWORD, DEFAULT_PASSWORD);
         //note: case invalid uuid
         performPostWithEmptyBody(FIND_USER_BY_ID_ROUTE + "/activate", user.getId().toString()).andExpect(status().isOk());
-        loginAndReturnTokenPair(user.getName(), DEFAULT_PASSWORD);
+        login(user.getName(), DEFAULT_PASSWORD);
         deleteUser(user.getId());
     }
 

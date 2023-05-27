@@ -16,6 +16,7 @@ import java.util.List;
 @JsonIgnoreProperties({"$$beanFactory"})
 public class UserPasswordPolicy {
     private boolean whitespacesAllowed;
+    private boolean repeatedPasswordAllowed;
     private int minimumLength;
     private int minimumLowerCharacters;
     private int minimumUpperCharacters;
