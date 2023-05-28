@@ -1,8 +1,5 @@
 package com.example.tutorial.controller;
 
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.models.examples.Example;
-
 public class ControllerConstants {
     /**
      * Generics constants.
@@ -27,4 +24,22 @@ public class ControllerConstants {
     public static final String SORT_ORDER_EXAMPLE = "asc (ascending) or desc (descending)";
     public static final String SORT_PROPERTY_DESCRIPTION = "Entity property to sort by";
 
+    //Auth controller constants
+    public static final String AUTH_ROUTE = "/auth";
+    public static final String AUTH_LOGIN_ENDPOINT = AUTH_ROUTE + "/login";
+    public static final String AUTH_ACTIVATE_EMAIL_ROUTE = AUTH_ROUTE + "/activate";
+    public static final String AUTH_RESEND_ACTIVATION_TOKEN_ROUTE = AUTH_ROUTE + "/activate/resend";
+    public static final String AUTH_GET_USER_PASSWORD_POLICY_ROUTE = AUTH_ROUTE + "/passwordPolicy";
+    public static final String AUTH_CHANGE_PASSWORD_ROUTE = AUTH_ROUTE + "/changePassword";
+    public static final String AUTH_REQUEST_PASSWORD_RESET_EMAIL_ROUTE = AUTH_ROUTE + "/requestPasswordReset";
+    public static final String AUTH_RESET_PASSWORD_ROUTE = AUTH_ROUTE + "/resetPassword";
+
+    //Users controller constants
+    public static final String USERS_ROUTE = "/users";
+    public static final String USERS_REGISTER_USER_ROUTE = USERS_ROUTE + "/register";
+    public static final String USERS_GET_USERS_ROUTE = USERS_ROUTE;
+    public static final String USERS_BY_USER_ID_ROUTE = USERS_ROUTE + "/{userId}";
+    public static final String USERS_GET_USER_BY_ID_ROUTE = USERS_BY_USER_ID_ROUTE;
+    public static final String USERS_DELETE_USER_BY_ID_ROUTE = USERS_BY_USER_ID_ROUTE;
+    public static final String USERS_ACTIVATE_USER_CREDENTIALS_ROUTE = USERS_BY_USER_ID_ROUTE + "/activate";
 }

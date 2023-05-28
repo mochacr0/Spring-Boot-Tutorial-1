@@ -25,19 +25,15 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
     private String activationToken;
     @Column(name = ModelConstants.USER_CREDENTIALS_ACTIVATION_TOKEN_EXPIRATION_MILLIS_COLUMN)
     private long activationTokenExpirationMillis;
-    @Column(name = ModelConstants.USER_CREDENTIALS_RESET_PASSWORD_TOKEN_COLUMN, unique = true)
-    private String resetPasswordToken;
+    @Column(name = ModelConstants.USER_CREDENTIALS_PASSWORD_RESET_TOKEN_COLUMN, unique = true)
+    private String passwordResetToken;
+    @Column(name = ModelConstants.USER_CREDENTIALS_PASSWORD_RESET_TOKEN_EXPIRATION_MILLIS_COLUMN)
+    private long passwordResetTokenExpirationMillis;
     @Column(name = ModelConstants.USER_CREDENTIALS_FAILED_LOGIN_HISTORY_TOKEN_COLUMN)
     @Convert(converter = JsonNodeStringConverter.class)
     private JsonNode failedLoginHistory;
-//    @Column(name = ModelConstants.USER_CREDENTIALS_FAILED_LOGIN_LOCK_EXPIRATION_MILLIS)
-//    private long failedLoginLockExpirationMillis;
-//    @Column(name = ModelConstants.USER_CREDENTIALS_FIRST_FAILED_LOGIN_ATTEMPTS_MILLIS)
-//    private long firstFailedLoginAttemptsMillis;
     @Column(name = ModelConstants.USER_CREDENTIALS_IS_VERIFIED_COLUMN)
     private boolean isVerified;
-//    @Column(name = ModelConstants.USER_CREDENTIALS_IS_ENABLED_COLUMN)
-//    private boolean isEnabled;
     @Column(name = ModelConstants.USER_CREDENTIALS_ADDITIONAL_INFO_COLUMN)
     @Convert(converter = JsonNodeStringConverter.class)
     private JsonNode additionalInfo;
@@ -49,7 +45,8 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
         data.setHashedPassword(this.getPassword());
         data.setActivationToken(this.getActivationToken());
         data.setActivationTokenExpirationMillis(this.getActivationTokenExpirationMillis());
-        data.setResetPasswordToken(this.getResetPasswordToken());
+        data.setPasswordResetToken(this.getPasswordResetToken());
+        data.setPasswordResetTokenExpirationMillis(this.getPasswordResetTokenExpirationMillis());
         data.setFailedLoginHistory(this.getFailedLoginHistory());
 //        data.setFailedLoginLockExpirationMillis(this.getFailedLoginLockExpirationMillis());
 //        data.setFirstFailedLoginAttemptsMillis(this.getFirstFailedLoginAttemptsMillis());
@@ -73,8 +70,10 @@ public class UserCredentialsEntity extends AbstractEntity<UserCredentials>{
         builder.append(this.getActivationToken());
         builder.append(", activationTokenExpirationMillis=");
         builder.append(this.getActivationTokenExpirationMillis());
-        builder.append(", resetPasswordToken=");
-        builder.append(this.getResetPasswordToken());
+        builder.append(", passwordResetToken=");
+        builder.append(this.getPasswordResetToken());
+        builder.append(", passwordResetTokenExpirationMillis");
+        builder.append(this.getPasswordResetTokenExpirationMillis());
         builder.append(", failedLoginHistory=");
         builder.append(this.getFailedLoginHistory());
 //        builder.append(", failedLoginLockExpirationMillis=");

@@ -50,7 +50,6 @@ public class UserCredentialsServiceImpl extends DataBaseService<UserCredentials,
     @Override
     public UserCredentials create(UserCredentials userCredentials) {
         this.userCredentialsDataValidator.validateOnCreate(userCredentials);
-        userCredentials.setHashedPassword(passwordEncoder.encode(userCredentials.getRawPassword()));
         return super.save(userCredentials);
     }
 
@@ -58,9 +57,6 @@ public class UserCredentialsServiceImpl extends DataBaseService<UserCredentials,
     public UserCredentials save(UserCredentials userCredentials) {
         log.info("Performing UserCredentialsService save");
         this.userCredentialsDataValidator.validateOnUpdate(userCredentials);
-        if (StringUtils.isNotEmpty(userCredentials.getRawPassword())) {
-            userCredentials.setHashedPassword(passwordEncoder.encode(userCredentials.getRawPassword()));
-        }
         return super.save(userCredentials);
     }
 
@@ -80,6 +76,12 @@ public class UserCredentialsServiceImpl extends DataBaseService<UserCredentials,
     public UserCredentials findByActivationToken(String activationToken) {
         log.info("Performing UserCredentialsService findByActivationToken");
         return DaoUtils.toData(userCredentialsRepository.findByActivationToken(activationToken));
+    }
+
+    @Override
+    public UserCredentials findByPasswordResetToken(String passwordResetToken) {
+        log.info("Performing findByPasswordResetToken service");
+        return DaoUtils.toData(userCredentialsRepository.findByPasswordResetToken(passwordResetToken));
     }
 
     @Override

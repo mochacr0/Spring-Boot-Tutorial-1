@@ -12,13 +12,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -27,14 +24,13 @@ import static com.example.tutorial.controller.ControllerConstants.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/users")
 @Tag(name = "User", description = "User-related APIs")
 public class UserController {
     @Autowired
     private UserService userService;
 
     @Operation(tags = {"User"}, summary = "Returns a page of available users")
-    @GetMapping(value = "")
+    @GetMapping(value = USERS_GET_USERS_ROUTE)
     PageData<User> getUsers (@Parameter(description = PAGE_NUMBER_DESCRIPTION)
                                @RequestParam(defaultValue = PAGE_NUMBER_DEFAULT_STRING_VALUE) int page,
                                @Parameter(description = PAGE_SIZE_DESCRIPTION)
@@ -50,7 +46,7 @@ public class UserController {
     }
 
     @Operation(tags = {"User"}, summary = "Fetch the User object based on the provided userId")
-    @GetMapping(value = "/{userId}")
+    @GetMapping(value = USERS_GET_USER_BY_ID_ROUTE)
     User getUserById (@Parameter(description = "A string value representing the user id", required = true)
                       @PathVariable(name = "userId") String userId) {
         if (StringUtils.isEmpty(userId)) {
@@ -71,7 +67,7 @@ public class UserController {
     @Operation(tags = {"User"}, summary = "Register new user", description = "Register new user. " +
                                                                              "When creating user, platform generates User Id as time-based UUID. " +
                                                                              "The newly created User Id will be present in the response. ")
-    @PostMapping(value = "/register")
+    @PostMapping(value = USERS_REGISTER_USER_ROUTE)
     User regsiterUser(@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "User registration payload",
                                                                             content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
                       @RequestBody RegisterUserRequest registerUserRequest,
@@ -82,7 +78,7 @@ public class UserController {
     }
 
     @Operation(tags = {"User"}, summary = "Delete the User specified by userId and its credentials. A non-existent User Id will result in an error.")
-    @DeleteMapping(value = "/{userId}")
+    @DeleteMapping(value = USERS_DELETE_USER_BY_ID_ROUTE)
     void deleteUser(@Parameter(description = "A string value representing the user id", required = true)
                     @PathVariable(name = "userId") String userId) {
         if (StringUtils.isEmpty(userId)) {
@@ -96,7 +92,7 @@ public class UserController {
         userService.deleteUnverifiedUsers();
     }
 
-    @PostMapping(value = "/{userId}/activate")
+    @PostMapping(value = USERS_ACTIVATE_USER_CREDENTIALS_ROUTE)
     void activateUserCredentialsByUserId(@PathVariable(name = "userId") String userId) {
         userService.activateUserCredentialsByUserId(UUID.fromString(userId));
     }

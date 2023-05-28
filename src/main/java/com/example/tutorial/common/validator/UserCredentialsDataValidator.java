@@ -51,21 +51,5 @@ public class UserCredentialsDataValidator extends DataValidator<UserCredentials>
         if (existingUser == null) {
             throw new InvalidDataException("User credentials cannot be assigned to a non-existent user");
         }
-        if (StringUtils.isNotEmpty(data.getRawPassword())) {
-            validateRawPassword(data.getRawPassword());
-        }
     }
-
-    public void validateRawPassword(String rawPassword) {
-        List<Rule> passwordRules = securitySettings.getPasswordPolicy().getPasswordRules();
-        PasswordValidator validator = new PasswordValidator(passwordRules);
-        RuleResult validateResult = validator.validate(new PasswordData(rawPassword));
-        if (!validateResult.isValid()) {
-            String violationMessage = String.join("\n", validator.getMessages(validateResult));
-            throw new InvalidDataException(violationMessage);
-        }
-        //validate password reuse frequency
-    }
-
-
 }

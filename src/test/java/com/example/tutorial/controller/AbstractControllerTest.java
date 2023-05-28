@@ -3,7 +3,6 @@ package com.example.tutorial.controller;
 import com.example.tutorial.common.data.RegisterUserRequest;
 import com.example.tutorial.common.data.User;
 import com.example.tutorial.security.JwtAccessToken;
-import com.example.tutorial.security.JwtToken;
 import com.example.tutorial.security.LoginRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,6 +22,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.io.IOException;
 import java.util.UUID;
 
+import static com.example.tutorial.controller.ControllerConstants.USERS_DELETE_USER_BY_ID_ROUTE;
+import static com.example.tutorial.controller.ControllerConstants.USERS_REGISTER_USER_ROUTE;
 import static com.example.tutorial.controller.ControllerTestConstants.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -155,15 +156,15 @@ public abstract class AbstractControllerTest {
         request.setEmail(email);
         request.setPassword(password);
         request.setConfirmPassword(confirmPassword);
-        return readResponse(performPost(REGISTER_USER_ROUTE, request).andExpect(status().isOk()), User.class);
+        return readResponse(performPost(USERS_REGISTER_USER_ROUTE, request).andExpect(status().isOk()), User.class);
     }
 
     protected User createUser(RegisterUserRequest request) throws Exception {
-        return performPost(REGISTER_USER_ROUTE, User.class, request);
+        return performPost(USERS_REGISTER_USER_ROUTE, User.class, request);
     }
 
     protected void deleteUser(UUID userId) throws Exception {
-        performDelete(DELETE_USER_BY_ID_ROUTE, userId.toString()).andExpect(status().isOk());
+        performDelete(USERS_DELETE_USER_BY_ID_ROUTE, userId.toString()).andExpect(status().isOk());
     }
 
     public String getRandomUsername() {

@@ -42,10 +42,21 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendActivationMail(String mailTo, String activateLink) {
-        String subject = "Activation Mail";
+        String subject = "Account activation mail";
         String templateLocation = "activation.ftl";
         Map<String, Object> model = new HashMap<>();
         model.put("activationLink", activateLink);
+        model.put("targetEmail", mailTo);
+        String message = convertTemplateIntoString(templateLocation, model);
+        sendMailAsync(mailSender.getUsername(), mailTo, subject, message);
+    }
+
+    @Override
+    public void sendPasswordResetMail(String mailTo, String passwordResetLink) {
+        String subject = "Password reset mail";
+        String templateLocation = "reset.password.ftl";
+        Map<String, Object> model = new HashMap<>();
+        model.put("passwordResetLink", passwordResetLink);
         model.put("targetEmail", mailTo);
         String message = convertTemplateIntoString(templateLocation, model);
         sendMailAsync(mailSender.getUsername(), mailTo, subject, message);

@@ -4,7 +4,6 @@ import com.example.tutorial.security.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -15,10 +14,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
@@ -29,6 +25,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.example.tutorial.controller.ControllerConstants.*;
 
 @Configuration
 @EnableWebSecurity
@@ -72,7 +70,15 @@ public class TutorialSecurityConfiguration {
     @Autowired
     private AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository;
 
-    public static final String HTTP_LOGIN_ENDPOINT = "/auth/login";
+    private static final List<String> NON_TOKEN_BASED_AUTH_ENTRY_ENDPOINTS = new ArrayList<>(Arrays.asList(
+            AUTH_LOGIN_ENDPOINT,
+            AUTH_REQUEST_PASSWORD_RESET_EMAIL_ROUTE,
+            AUTH_ACTIVATE_EMAIL_ROUTE,
+            AUTH_RESEND_ACTIVATION_TOKEN_ROUTE,
+            AUTH_RESET_PASSWORD_ROUTE,
+//            AUTH_CHANGE_PASSWORD_ROUTE,
+            "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
+            "/users/**"));
 
     @Bean
     public AuthenticationManager authenticationManager(ObjectPostProcessor<Object> objectPostProcessor) throws Exception {
@@ -87,7 +93,7 @@ public class TutorialSecurityConfiguration {
 
     public RestLoginProcessingFilter buildRestLoginProcessingFilter() {
         RestLoginProcessingFilter filter = new RestLoginProcessingFilter(
-                HTTP_LOGIN_ENDPOINT,
+                AUTH_LOGIN_ENDPOINT,
                 restAuthenticationSuccessHandler,
                 restAuthenticationFailureHandler,
                 mapper);
@@ -98,7 +104,7 @@ public class TutorialSecurityConfiguration {
     public JwtAuthenticationProcessingFilter buildJwtAuthenticationProcessingFilter() {
         String processingPath = "/**";
         List<String> skipPaths = new ArrayList<>();
-        skipPaths.addAll(Arrays.asList("/auth/login", "/users/**"));
+        skipPaths.addAll(NON_TOKEN_BASED_AUTH_ENTRY_ENDPOINTS);
         JwtAuthenticationProcessingFilter filter = new JwtAuthenticationProcessingFilter(new SkipPathRequestMatcher(skipPaths, processingPath), restAuthenticationFailureHandler, jwtTokenExtractor);
         filter.setAuthenticationManager(this.authenticationManager);
         return filter;
@@ -117,7 +123,7 @@ public class TutorialSecurityConfiguration {
 //                .requestMatchers("/users").permitAll()
 //                .requestMatchers("/oauth2").permitAll()
 //                .requestMatchers("/user").permitAll()
-                .requestMatchers(HTTP_LOGIN_ENDPOINT).permitAll()
+                .requestMatchers(AUTH_LOGIN_ENDPOINT).permitAll()
                 .anyRequest().permitAll()
                 .and()
             .addFilterBefore(buildRestLoginProcessingFilter(), UsernamePasswordAuthenticationFilter.class)

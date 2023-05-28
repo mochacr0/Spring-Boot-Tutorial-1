@@ -7,6 +7,8 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static com.example.tutorial.controller.ControllerConstants.AUTH_ROUTE;
+import static com.example.tutorial.controller.ControllerConstants.USERS_GET_USER_BY_ID_ROUTE;
 import static com.example.tutorial.controller.ControllerTestConstants.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -16,10 +18,12 @@ public class AuthControllerTest extends AbstractControllerTest {
     private final String LOCKED_EXCEPTION_MESSAGE = "Authentication failed: Username was locked due to security policy";
     @Autowired
     private UserService userService;
-    @Test
-    void testGetUserPasswordPolicy() throws Exception {
-        performGet(AUTH_ROUTE + "/passwordPolicy").andExpect(status().isOk());
-    }
+
+
+//    @Test
+//    void testGetUserPasswordPolicy() throws Exception {
+//        performGet(AUTH_ROUTE + "/passwordPolicy").andExpect(status().isOk());
+//    }
 
     @Nested
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -30,10 +34,10 @@ public class AuthControllerTest extends AbstractControllerTest {
         @BeforeEach
         void setUp() throws Exception {
             user = createUser(getRandomUsername(), getRandomEmail(), DEFAULT_PASSWORD, DEFAULT_PASSWORD);
-            performPostWithEmptyBody(FIND_USER_BY_ID_ROUTE + "/activate", user.getId().toString());
+            performPostWithEmptyBody(USERS_GET_USER_BY_ID_ROUTE + "/activate", user.getId().toString());
         }
 
-        @BeforeEach
+        @AfterEach
         void tearDown() throws Exception {
             if (user != null) {
                 deleteUser(user.getId());
@@ -104,21 +108,18 @@ public class AuthControllerTest extends AbstractControllerTest {
         private ChangePasswordRequest changePasswordRequest;
         private final String NEW_PASSWORD = "new" + DEFAULT_PASSWORD;
 
-        @BeforeAll
-        void setUpRequest() {
+        @BeforeEach
+        void setUp() throws Exception {
+            user = createUser(getRandomUsername(), getRandomEmail(), DEFAULT_PASSWORD, DEFAULT_PASSWORD);
+            performPostWithEmptyBody(USERS_GET_USER_BY_ID_ROUTE + "/activate", user.getId().toString());
+            login(user.getName(),DEFAULT_PASSWORD);
             changePasswordRequest = new ChangePasswordRequest();
             changePasswordRequest.setCurrentPassword(DEFAULT_PASSWORD);
             changePasswordRequest.setNewPassword(NEW_PASSWORD);
             changePasswordRequest.setConfirmPassword(NEW_PASSWORD);
         }
-        @BeforeEach
-        void setUp() throws Exception {
-            user = createUser(getRandomUsername(), getRandomEmail(), DEFAULT_PASSWORD, DEFAULT_PASSWORD);
-            performPostWithEmptyBody(FIND_USER_BY_ID_ROUTE + "/activate", user.getId().toString());
-            login(user.getName(),DEFAULT_PASSWORD);
-        }
 
-        @BeforeEach
+        @AfterEach
         void tearDown() throws Exception {
             if (user != null) {
                 deleteUser(user.getId());

@@ -25,7 +25,7 @@ import org.springframework.http.MediaType;
 import java.util.Collections;
 import java.util.List;
 
-import static com.example.tutorial.config.TutorialSecurityConfiguration.HTTP_LOGIN_ENDPOINT;
+import static com.example.tutorial.controller.ControllerConstants.AUTH_LOGIN_ENDPOINT;
 
 @Slf4j
 @Configuration
@@ -100,7 +100,7 @@ public class SwaggerConfiguration {
     private void customizeLoginEndpoint(OpenAPI openApi) {
         openApi.getComponents().getSchemas().putAll(ModelConverters.getInstance().read(LoginRequest.class));
         openApi.getComponents().getSchemas().putAll(ModelConverters.getInstance().read(JwtAccessToken.class));
-        PathItem loginEndpoint = openApi().getPaths().get(HTTP_LOGIN_ENDPOINT);
+        PathItem loginEndpoint = openApi().getPaths().get(AUTH_LOGIN_ENDPOINT);
         if (loginEndpoint != null) {
             return;
         }
@@ -118,7 +118,7 @@ public class SwaggerConfiguration {
                                                 .schema(new Schema()
                                                         .$ref(LoginRequest.class.getSimpleName())))))
                 .responses(getLoginResponses()));
-        openApi.path(HTTP_LOGIN_ENDPOINT, loginEndpoint);
+        openApi.path(AUTH_LOGIN_ENDPOINT, loginEndpoint);
     }
 
     private ApiResponses getLoginResponses() {

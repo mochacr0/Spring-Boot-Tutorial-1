@@ -10,8 +10,8 @@ import org.junit.jupiter.api.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
+import static com.example.tutorial.controller.ControllerConstants.*;
 import static com.example.tutorial.controller.ControllerTestConstants.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -23,28 +23,28 @@ public class UserControllerTest extends AbstractControllerTest {
 
         @Test
         void testFindUsersWithInvalidPageNumber() throws Exception {
-            performGet(FIND_USERS_ROUTE + "?page={page}", NEGATIVE_INT_VALUE)
+            performGet(USERS_GET_USERS_ROUTE + "?page={page}", NEGATIVE_INT_VALUE)
                     .andExpect(status().isBadRequest());
             String stringPageSize = "string";
-            performGet(FIND_USERS_ROUTE + "?page={page}", STRING_VALUE)
+            performGet(USERS_GET_USERS_ROUTE + "?page={page}", STRING_VALUE)
                     .andExpect(status().isBadRequest());
         }
 
         @Test
         void testFindUsersWithInvalidPageSize() throws Exception {
-            performGet(FIND_USERS_ROUTE + "?pageSize={pageSize}", ZERO_INT_VALUE)
+            performGet(USERS_GET_USERS_ROUTE + "?pageSize={pageSize}", ZERO_INT_VALUE)
                     .andExpect(status().isBadRequest());
-            performGet(FIND_USERS_ROUTE + "?pageSize={pageSize}", NEGATIVE_INT_VALUE)
+            performGet(USERS_GET_USERS_ROUTE + "?pageSize={pageSize}", NEGATIVE_INT_VALUE)
                     .andExpect(status().isBadRequest());
-            performGet(FIND_USERS_ROUTE + "?pageSize={pageSize}", STRING_VALUE)
+            performGet(USERS_GET_USERS_ROUTE + "?pageSize={pageSize}", STRING_VALUE)
                     .andExpect(status().isBadRequest());
         }
 
         @Test
         void testFindUsersWithInvalidSort() throws Exception {
-            performGet(FIND_USERS_ROUTE +"?sortDirection={sortDirection}", INVALID_SORT_DIRECTION)
+            performGet(USERS_GET_USERS_ROUTE +"?sortDirection={sortDirection}", INVALID_SORT_DIRECTION)
                     .andExpect(status().isBadRequest());
-            performGet(FIND_USERS_ROUTE +"?sortProperty={sortProperty}", INVALID_SORT_PROPERTY)
+            performGet(USERS_GET_USERS_ROUTE +"?sortProperty={sortProperty}", INVALID_SORT_PROPERTY)
                     .andExpect(status().isBadRequest());
         }
 
@@ -66,7 +66,7 @@ public class UserControllerTest extends AbstractControllerTest {
             List<User> savedUsers = new ArrayList<>();
             PageData<User> data;
             do {
-                data = performGetWithReferencedType(FIND_USERS_ROUTE + "?page={page}&pageSize={pageSize}&sortDirection={sortDirection}&sortProperty={sortProperty}",
+                data = performGetWithReferencedType(USERS_GET_USERS_ROUTE + "?page={page}&pageSize={pageSize}&sortDirection={sortDirection}&sortProperty={sortProperty}",
                         new TypeReference<>(){},
                         currentPage, pageSize, "desc", "createdAt");
                 savedUsers.addAll(data.getData().stream().toList());
@@ -115,7 +115,7 @@ public class UserControllerTest extends AbstractControllerTest {
                 request.setEmail("duplicatednameuser@gmail.com");
                 request.setPassword(DEFAULT_PASSWORD);
                 request.setConfirmPassword(DEFAULT_PASSWORD);
-                performPost(REGISTER_USER_ROUTE , request)
+                performPost(USERS_REGISTER_USER_ROUTE, request)
                         .andExpect(status().isBadRequest());
             }
             @Test
@@ -125,7 +125,7 @@ public class UserControllerTest extends AbstractControllerTest {
                 request.setEmail(defaultUser.getEmail());
                 request.setPassword(DEFAULT_PASSWORD);
                 request.setConfirmPassword(DEFAULT_PASSWORD);
-                performPost(REGISTER_USER_ROUTE, request)
+                performPost(USERS_REGISTER_USER_ROUTE, request)
                         .andExpect(status().isBadRequest());
             }
         }
@@ -143,22 +143,22 @@ public class UserControllerTest extends AbstractControllerTest {
             @Test
             void testRegisterUserWithMissingNameField () throws Exception {
                 request.setName(null);
-                performPost(REGISTER_USER_ROUTE, request).andExpect(status().isBadRequest());
+                performPost(USERS_REGISTER_USER_ROUTE, request).andExpect(status().isBadRequest());
             }
             @Test
             void testRegisterUserWithMissingEmailField () throws Exception {
                 request.setEmail(null);
-                performPost(REGISTER_USER_ROUTE, request).andExpect(status().isBadRequest());
+                performPost(USERS_REGISTER_USER_ROUTE, request).andExpect(status().isBadRequest());
             }
             @Test
             void testRegisterUserWithMissingPasswordField () throws Exception {
                 request.setPassword(null);
-                performPost(REGISTER_USER_ROUTE, request).andExpect(status().isBadRequest());
+                performPost(USERS_REGISTER_USER_ROUTE, request).andExpect(status().isBadRequest());
             }
             @Test
             void testRegisterUserWithMissingConfirmPasswordField () throws Exception {
                 request.setConfirmPassword(null);
-                performPost(REGISTER_USER_ROUTE, request).andExpect(status().isBadRequest());
+                performPost(USERS_REGISTER_USER_ROUTE, request).andExpect(status().isBadRequest());
             }
         }
 
@@ -169,7 +169,7 @@ public class UserControllerTest extends AbstractControllerTest {
             request.setName(getRandomUsername());
             request.setEmail(invalidFormatEmail);
             request.setMatchedPasswords(DEFAULT_PASSWORD);
-            performPost(REGISTER_USER_ROUTE, request)
+            performPost(USERS_REGISTER_USER_ROUTE, request)
                     .andExpect(status().isBadRequest());
         }
 
@@ -187,18 +187,18 @@ public class UserControllerTest extends AbstractControllerTest {
                 String unmatchedConfirmPassword = "Not" + DEFAULT_PASSWORD;
                 request.setPassword(DEFAULT_PASSWORD);
                 request.setConfirmPassword(unmatchedConfirmPassword);
-                performPost(REGISTER_USER_ROUTE, request)
+                performPost(USERS_REGISTER_USER_ROUTE, request)
                         .andExpect(status().isBadRequest());
             }
             @Test
             void testRegisterUserWithPasswordViolations() throws Exception {
                 String noUpperCaseLetterPassword = "string";
                 request.setMatchedPasswords(noUpperCaseLetterPassword);
-                performPost(REGISTER_USER_ROUTE, request)
+                performPost(USERS_REGISTER_USER_ROUTE, request)
                         .andExpect(status().isBadRequest());
                 String underMinimumLengthPassword = "1";
                 request.setMatchedPasswords(underMinimumLengthPassword);
-                performPost(REGISTER_USER_ROUTE, request)
+                performPost(USERS_REGISTER_USER_ROUTE, request)
                         .andExpect(status().isBadRequest());
             }
         }
@@ -210,7 +210,7 @@ public class UserControllerTest extends AbstractControllerTest {
             request.setEmail(getRandomEmail());
             request.setPassword(DEFAULT_PASSWORD);
             request.setConfirmPassword(DEFAULT_PASSWORD);
-            User user = readResponse(performPost(USER_ROUTE + "/register", request).andExpect(status().isOk()), User.class);
+            User user = readResponse(performPost(USERS_ROUTE + "/register", request).andExpect(status().isOk()), User.class);
             deleteUser(user.getId());
         }
     }
@@ -222,15 +222,15 @@ public class UserControllerTest extends AbstractControllerTest {
         String password = "Password";
         User createdUser = createUser(name, email, password, password);
         Assertions.assertNotNull(createdUser);
-        performDelete(DELETE_USER_BY_ID_ROUTE, createdUser.getId()).andExpect(status().isOk());
-        performGet(FIND_USER_BY_ID_ROUTE, createdUser.getId()).andExpect(status().isNotFound());
+        performDelete(USERS_DELETE_USER_BY_ID_ROUTE, createdUser.getId()).andExpect(status().isOk());
+        performGet(USERS_GET_USER_BY_ID_ROUTE, createdUser.getId()).andExpect(status().isNotFound());
     }
 
     @Test
     void testActivateUserCredentialsByUserId() throws Exception {
         User user = createUser(getRandomUsername(), getRandomEmail(), DEFAULT_PASSWORD, DEFAULT_PASSWORD);
         //note: case invalid uuid
-        performPostWithEmptyBody(FIND_USER_BY_ID_ROUTE + "/activate", user.getId().toString()).andExpect(status().isOk());
+        performPostWithEmptyBody(USERS_GET_USER_BY_ID_ROUTE + "/activate", user.getId().toString()).andExpect(status().isOk());
         login(user.getName(), DEFAULT_PASSWORD);
         deleteUser(user.getId());
     }
@@ -246,9 +246,9 @@ public class UserControllerTest extends AbstractControllerTest {
             request.setConfirmPassword("Password");
             createdUsers.add(createUser(request));
         }
-        performDelete(USER_ROUTE + "/test-delete").andExpect(status().isOk());
+        performDelete(USERS_ROUTE + "/test-delete").andExpect(status().isOk());
         for (User createdUser : createdUsers) {
-            performGet(FIND_USER_BY_ID_ROUTE, createdUser.getId()).andExpect(status().isNotFound());
+            performGet(USERS_GET_USER_BY_ID_ROUTE, createdUser.getId()).andExpect(status().isNotFound());
         }
     }
 

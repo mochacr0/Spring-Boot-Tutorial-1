@@ -14,6 +14,7 @@ import java.util.UUID;
 public interface UserCredentialsRepository extends JpaRepository<UserCredentialsEntity, UUID> {
     Optional<UserCredentialsEntity> findByUserId(UUID id);
     Optional<UserCredentialsEntity> findByActivationToken(String activationToken);
+    Optional<UserCredentialsEntity> findByPasswordResetToken(String passwordResetToken);
     void deleteByUserId(UUID userId);
     @Query("SELECT u FROM UserCredentialsEntity u WHERE u.isVerified = FALSE AND u.activationTokenExpirationMillis < :currentTime")
     List<UserCredentialsEntity> findUnverifiedUsers(@Param("currentTime") long currentTime);

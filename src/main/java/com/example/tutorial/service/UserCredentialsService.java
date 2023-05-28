@@ -14,9 +14,9 @@ public interface UserCredentialsService {
     UserCredentials findById(UUID id);
     UserCredentials findByUserId(UUID id);
     UserCredentials findByActivationToken(String activationToken);
+    UserCredentials findByPasswordResetToken(String passwordResetToken);
     List<UserCredentials> findUnverifiedUserCredentials();
     void deleteById(UUID id);
     void deleteByUserId(UUID userId);
     void validatePassword(UserCredentials userCredentials, String password, String clientIpAddress);
-//    void logLoginAction(UserCredentials userCredentials);
 }

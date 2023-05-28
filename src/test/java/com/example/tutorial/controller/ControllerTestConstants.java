@@ -14,12 +14,6 @@ public class ControllerTestConstants {
     protected static String DEFAULT_USER_EMAIL = "defaultuser@gmail.com";
     protected static String DEFAULT_USER_NAME = "defaultuser";
     protected static final String DEFAULT_PASSWORD = "Defaultpassword";
-    public static final String USER_ROUTE = "/users";
-    public static final String REGISTER_USER_ROUTE = USER_ROUTE + "/register";
-    public static final String FIND_USERS_ROUTE = USER_ROUTE;
-    public static final String FIND_USER_BY_ID_ROUTE = USER_ROUTE + "/{userId}";
-    public static final String DELETE_USER_BY_ID_ROUTE = USER_ROUTE + "/{userId}";
 
     //Auth controller test constants
-    public static final String AUTH_ROUTE = "/auth";
 }

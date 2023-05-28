@@ -3,6 +3,7 @@ package com.example.tutorial.service;
 import com.example.tutorial.common.data.*;
 import com.example.tutorial.common.utils.DaoUtils;
 import com.example.tutorial.common.utils.UrlUtils;
+import com.example.tutorial.common.validator.CommonValidator;
 import com.example.tutorial.common.validator.DataValidator;
 import com.example.tutorial.config.SecuritySettingsConfiguration;
 import com.example.tutorial.exception.InvalidDataException;
@@ -44,6 +45,8 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
     private SecuritySettingsConfiguration securitySettings;
     @Autowired
     private ThreadPoolTaskExecutor taskExecutor;
+    @Autowired
+    private CommonValidator commonValidator;
 
     @Override
     public JpaRepository<UserEntity, UUID> getRepository() {
@@ -58,7 +61,7 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
     @Override
     public PageData<User> findUsers(PageParameter pageParameter) {
         log.info("Performing UserService findUsers");
-        validatePageParameter(pageParameter);
+        commonValidator.validatePageParameter(pageParameter);
         return DaoUtils.toPageData(userRepository.findAll(DaoUtils.toPageable(pageParameter)));
     }
 
@@ -100,14 +103,14 @@ public class UserServiceImpl extends DataBaseService<User, UserEntity> implement
     @Transactional
     public User register(RegisterUserRequest registerUserRequest, HttpServletRequest request, boolean isMailRequired) {
         log.info("Performing UserService register");
-        validatePasswords(registerUserRequest.getPassword(), registerUserRequest.getConfirmPassword());
+        commonValidator.validatePasswords(registerUserRequest.getPassword(), registerUserRequest.getConfirmPassword());
         User user = new User(registerUserRequest);
         userDataValidator.validateOnCreate(user);
         User savedUser = super.save(user);
         if (savedUser.getId() != null) {
             UserCredentials userCredentials = new UserCredentials();
             userCredentials.setUserId(savedUser.getId());
-            userCredentials.setRawPassword(registerUserRequest.getPassword());
+            userCredentials.setHashedPassword(passwordEncoder.encode(registerUserRequest.getPassword()));
             if (isMailRequired) {
                 String activateToken = RandomStringUtils.randomAlphanumeric(this.DEFAULT_TOKEN_LENGTH);
                 userCredentials.setActivationToken(activateToken);

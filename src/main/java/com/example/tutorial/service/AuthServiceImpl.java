@@ -1,10 +1,13 @@
 package com.example.tutorial.service;
 
 import com.example.tutorial.common.data.ChangePasswordRequest;
+import com.example.tutorial.common.data.PasswordResetRequest;
 import com.example.tutorial.common.data.User;
 import com.example.tutorial.common.data.UserCredentials;
 import com.example.tutorial.common.security.SecurityUser;
 import com.example.tutorial.common.utils.UrlUtils;
+import com.example.tutorial.common.validator.CommonValidator;
+import com.example.tutorial.common.validator.UserCredentialsDataValidator;
 import com.example.tutorial.config.MailConfiguration;
 import com.example.tutorial.config.SecuritySettingsConfiguration;
 import com.example.tutorial.exception.IncorrectParameterException;
@@ -17,9 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.awt.desktop.SystemEventListener;
 
 @Service
 @Slf4j
@@ -38,6 +43,8 @@ public class AuthServiceImpl extends AbstractService implements AuthService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtTokenFactory tokenFactory;
+    @Autowired
+    private CommonValidator commonValidator;
     @Override
     public void activateEmail(String activationToken) {
         log.info("Performing service activateEmail");
@@ -57,7 +64,6 @@ public class AuthServiceImpl extends AbstractService implements AuthService {
         }
         //valid activation token
         userCredentials.setVerified(true);
-//        userCredentials.setEnabled(true);
         userCredentials.setActivationToken(null);
         userCredentials.setActivationTokenExpirationMillis(0);
         userCredentialsService.save(userCredentials);
@@ -83,8 +89,8 @@ public class AuthServiceImpl extends AbstractService implements AuthService {
         String activationToken = RandomStringUtils.randomAlphanumeric(this.DEFAULT_TOKEN_LENGTH);
         userCredentials.setActivationToken(activationToken);
         userCredentials.setActivationTokenExpirationMillis(System.currentTimeMillis() + securitySettings.getActivationTokenExpirationMillis());
-        UserCredentials savedUserCredentials = userCredentialsService.save(userCredentials);
-        String activationLink = String.format(this.ACTIVATION_URL_PATTERN, UrlUtils.getBaseUrl(request), savedUserCredentials.getActivationToken());
+        userCredentialsService.save(userCredentials);
+        String activationLink = String.format(this.ACTIVATION_URL_PATTERN, UrlUtils.getBaseUrl(request), activationToken);
         mailService.sendActivationMail(email, activationLink);
     }
 
@@ -94,7 +100,7 @@ public class AuthServiceImpl extends AbstractService implements AuthService {
         if (StringUtils.isEmpty(request.getCurrentPassword())) {
             throw new InvalidDataException("Current password cannot be empty");
         }
-        validatePasswords(request.getNewPassword(), request.getConfirmPassword());
+        commonValidator.validatePasswords(request.getNewPassword(), request.getConfirmPassword());
         SecurityUser currentUser = this.getCurrentUser();
         UserCredentials userCredentials = userCredentialsService.findByUserId(currentUser.getId());
         if (userCredentials == null) {
@@ -107,9 +113,56 @@ public class AuthServiceImpl extends AbstractService implements AuthService {
                 request.getCurrentPassword().equals(request.getNewPassword())) {
             throw new InvalidDataException("New password must be different from the current password");
         }
-        userCredentials.setRawPassword(request.getNewPassword());
         userCredentials.setHashedPassword(passwordEncoder.encode(request.getNewPassword()));
         userCredentialsService.save(userCredentials);
         return tokenFactory.createAccessToken(currentUser);
+    }
+
+    @Override
+    public void requestPasswordResetEmail(String email, HttpServletRequest request) {
+        log.info("Performing requestPasswordResetEmail service");
+        if (StringUtils.isBlank(email)) {
+            throw new InvalidDataException("Email cannot be empty");
+        }
+        User user = userService.findByEmail(email);
+        if (user == null) {
+            throw new ItemNotFoundException(String.format("Unable to find user with given email [%s]", email));
+        }
+        UserCredentials userCredentials = userCredentialsService.findByUserId(user.getId());
+        if (userCredentials == null) {
+            throw new ItemNotFoundException("Unable to find user credentials for given user");
+        }
+        if (!userCredentials.isVerified()) {
+            throw new DisabledException("User account is not verified");
+        }
+        String passwordResetToken = RandomStringUtils.randomAlphanumeric(this.DEFAULT_TOKEN_LENGTH);
+        userCredentials.setPasswordResetToken(passwordResetToken);
+        userCredentials.setPasswordResetTokenExpirationMillis(System.currentTimeMillis() + securitySettings.getPasswordResetTokenExpirationMillis());
+        userCredentialsService.save(userCredentials);
+        String passwordResetLink = String.format(this.PASSWORD_RESET_PATTERN, UrlUtils.getBaseUrl(request), passwordResetToken);
+        mailService.sendPasswordResetMail(email, passwordResetLink);
+    }
+
+    @Override
+    public void resetPassword(PasswordResetRequest request) {
+        log.info("Performing resetPassword service");
+        if (StringUtils.isBlank(request.getPasswordResetToken())) {
+            throw new InvalidDataException("Password reset token cannot be empty");
+        }
+        commonValidator.validatePasswords(request.getNewPassword(), request.getConfirmPassword());
+        UserCredentials userCredentials = userCredentialsService.findByPasswordResetToken(request.getPasswordResetToken());
+        if (userCredentials == null) {
+            throw new ItemNotFoundException(String.format("Unable to find user credentials with given password reset token [%s]", request.getPasswordResetToken()));
+        }
+        if (userCredentials.getPasswordResetTokenExpirationMillis() < System.currentTimeMillis()) {
+            throw new InvalidDataException("Invalid password reset token");
+        }
+        if (passwordEncoder.matches(request.getNewPassword(), userCredentials.getHashedPassword())) {
+            throw new InvalidDataException("New password must be different from the current password");
+        }
+        userCredentials.setPasswordResetToken(null);
+        userCredentials.setPasswordResetTokenExpirationMillis(0);
+        userCredentials.setHashedPassword(passwordEncoder.encode(request.getNewPassword()));
+        userCredentialsService.save(userCredentials);
     }
 }
